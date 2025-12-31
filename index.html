@@ -125,7 +125,7 @@
     cursor: pointer;
   }
   .score {
-    font-size: 72px; /* más grande */
+    font-size: 72px; /* fuente grande */
     font-weight: bold;
     word-break: break-word;
   }
@@ -146,9 +146,13 @@
     font-weight: bold;
     user-select: none;
   }
-  .btn-compra {
+  .btn-compra-container {
     margin-top: 8px;
-    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+  .btn-compra, .btn-add-compra {
+    flex: 1;
     background: #b36b00;
     border: none;
     border-radius: 6px;
@@ -158,6 +162,10 @@
     font-size: 14px;
     cursor: pointer;
     user-select: none;
+    transition: background-color 0.2s;
+  }
+  .btn-compra:hover:not(:disabled), .btn-add-compra:hover {
+    background: #d49500;
   }
   .btn-compra:disabled {
     background: #555;
@@ -167,6 +175,23 @@
     display: flex;
     justify-content: center;
     padding: 10px;
+  }
+  /* Selector juegos - borde verde y texto centrado */
+  #game-select {
+    border: 2px solid #4caf50;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: bold;
+    color: #4caf50;
+    background: #000;
+    text-align-last: center; /* para Firefox */
+    text-align: center;
+    cursor: pointer;
+    min-width: 130px;
+  }
+  #game-select option {
+    color: #000;
+    text-align: center;
   }
   .modal {
     position: fixed;
@@ -317,7 +342,10 @@
         <div class="divider"></div>
         <div class="score-zone" tabindex="0" aria-label="Puntaje de ${p.name}">${p.score}</div>
         <div class="compras">Compras: ${p.compras}</div>
-        <button class="btn-compra" ${p.compras <= 0 || state.winner !== null ? 'disabled' : ''} aria-label="Usar compra de ${p.name}">USAR COMPRA</button>
+        <div class="btn-compra-container">
+          <button class="btn-compra" ${p.compras <= 0 || state.winner !== null ? 'disabled' : ''} aria-label="Usar compra de ${p.name}">USAR COMPRA</button>
+          <button class="btn-add-compra" aria-label="Agregar compra a ${p.name}">+1</button>
+        </div>
       `;
 
       const nameInput = d.querySelector(".name");
@@ -343,8 +371,41 @@
         }
       };
 
+      const btnAddCompra = d.querySelector(".btn-add-compra");
+      btnAddCompra.onclick = () => {
+        if (state.winner !== null) return;
+        modalText.textContent = `¿Confirmas agregar 1 compra a ${p.name}?`;
+        modalInput.style.display = "none";
+        modal.style.display = "flex";
+        modalActions.innerHTML = `
+          <button class="btn-yes" id="confirmAddCompra">SI</button>
+          <button class="btn-no" id="cancelAddCompra">NO</button>
+        `;
+
+        function confirmAdd() {
+          snapshot();
+          p.compras++;
+          save();
+          render();
+          closeModal();
+        }
+
+        function cancelAdd() {
+          closeModal();
+        }
+
+        document.getElementById("confirmAddCompra").onclick = confirmAdd;
+        document.getElementById("cancelAddCompra").onclick = cancelAdd;
+      };
+
       playersDiv.appendChild(d);
     });
+  }
+
+  function closeModal() {
+    modal.style.display = "none";
+    modalInput.value = "";
+    modalActions.innerHTML = "";
   }
 
   function openScore(i) {
