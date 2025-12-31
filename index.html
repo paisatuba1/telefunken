@@ -10,7 +10,8 @@
     font-family: Arial, sans-serif;
   }
   html, body {
-    margin: 0; padding: 0;
+    margin: 0;
+    padding: 0;
     background: #000;
     color: #fff;
     min-height: 100vh;
@@ -20,30 +21,19 @@
     text-align: center;
     letter-spacing: 4px;
     margin: 15px 0;
-    user-select: none;
   }
   .top-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 12px;
+    padding: 0 10px;
     margin-bottom: 10px;
   }
-  /* Contenedor controles izq (jugadores + deshacer) */
+  /* Left controls */
   .left-controls {
     display: flex;
-    gap: 12px;
-  }
-  /* Contenedor controles der (juegos) */
-  .right-controls {
-    min-width: 240px;
-    background: #0a3c0a;
-    border: 2px solid #0f7c0f;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
+    gap: 10px;
     align-items: center;
-    padding: 6px 10px;
   }
   select, button {
     background: #000;
@@ -52,6 +42,8 @@
     border-radius: 6px;
     padding: 8px 12px;
     font-size: 16px;
+  }
+  button {
     cursor: pointer;
   }
   button:disabled {
@@ -66,23 +58,33 @@
     border-color: #6b2f2f;
     color: #e5a0a0;
   }
-  .btn-use-buy {
-    border-color: #cc6600;
-    color: #ffb84d;
+  /* Right controls */
+  .right-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .btn-add-buy {
-    border-color: #00662e;
-    color: #94d48e;
+  #gameSelector {
+    background: #003300;
+    border: 2px solid #00aa00;
+    border-radius: 8px;
+    color: #9be5b1;
+    font-weight: bold;
+    padding: 8px 16px;
+    font-size: 18px;
+    min-width: 150px;
+    text-align: center;
   }
+  /* Players grid */
   .players {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0,1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(3, 1fr);
-    height: calc(100vh - 150px);
+    gap: 8px;
+    height: calc(100vh - 170px);
     width: 100%;
-    padding: 0 8px;
+    padding: 0 4px;
     overflow: hidden;
-    gap: 10px;
   }
   .player {
     border: 1px solid #222;
@@ -91,9 +93,8 @@
     flex-direction: column;
     transition: 0.3s;
     min-width: 0;
-    user-select: none;
     background: #111;
-    border-radius: 6px;
+    position: relative;
   }
   .player.disabled {
     opacity: 0.35;
@@ -138,11 +139,9 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    min-height: 120px;
-    min-width: 0;
   }
   .score {
-    font-size: 72px;
+    font-size: 72px; /* Tamaño aumentado */
     font-weight: bold;
     word-break: break-word;
     user-select: none;
@@ -156,20 +155,21 @@
     font-weight: bold;
     letter-spacing: 2px;
   }
+  /* Bottom */
   .bottom {
     display: flex;
     justify-content: center;
-    padding: 10px;
+    padding: 10px 0 20px 0;
   }
-  /* MODAL */
+  /* Modal */
   .modal {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.85);
+    background: rgba(0, 0, 0, 0.85);
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 999;
+    z-index: 100;
   }
   .modal-box {
     background: #111;
@@ -191,37 +191,60 @@
   .modal-actions {
     display: flex;
     gap: 10px;
+    flex-direction: column;
   }
   .modal-actions button {
-    flex: 1;
     padding: 10px 0;
+    border-radius: 6px;
+    border: none;
+    font-size: 18px;
     font-weight: bold;
+    cursor: pointer;
+  }
+  .modal-actions button:hover:not(:disabled) {
+    filter: brightness(1.1);
   }
   .btn-yes {
-    border-color: #2f6b3f;
+    background-color: #2f6b3f;
     color: #9be5b1;
   }
   .btn-no {
-    border-color: #6b2f2f;
+    background-color: #6b2f2f;
     color: #e5a0a0;
   }
-
-  /* Modal botones igual ancho que input */
-  .modal-box > .modal-actions {
-    max-width: 280px;
-    margin: 0 auto;
-  }
-  .modal-box > .modal-actions > button {
-    max-width: 90px;
-  }
-
-  /* Controles para comprar */
-  .buy-controls {
+  /* Removed cancel button styling since it’s removed */
+  
+  /* Controls for purchases */
+  .purchase-controls {
     display: flex;
     justify-content: center;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 10px;
+    margin-top: 10px;
   }
+  .btn-use-purchase, .btn-add-purchase {
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 1px solid;
+    user-select: none;
+  }
+  .btn-use-purchase {
+    background-color: #444;
+    border-color: #888;
+    color: #eee;
+  }
+  .btn-use-purchase:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .btn-add-purchase {
+    background-color: #2f6b3f;
+    border-color: #9be5b1;
+    color: #9be5b1;
+  }
+
 </style>
 </head>
 <body>
@@ -238,8 +261,9 @@
     </select>
     <button class="btn-undo" id="undo" disabled>DESHACER</button>
   </div>
+
   <div class="right-controls">
-    <select id="gameSelect" title="Seleccione juego">
+    <select id="gameSelector" title="Selecciona el juego">
       <option value="1/3">1/3</option>
       <option value="1/4">1/4</option>
       <option value="1/5">1/5</option>
@@ -256,7 +280,7 @@
 <div class="players" id="players"></div>
 
 <div class="bottom">
-  <button class="btn-reset" onclick="resetGame()">REINICIAR</button>
+  <button class="btn-reset" id="resetBtn">REINICIAR</button>
 </div>
 
 <div class="modal" id="modal">
@@ -268,7 +292,6 @@
 </div>
 
 <script>
-  // Estado inicial o guardado
   let state = JSON.parse(localStorage.getItem("telefuker")) || {
     count: 0,
     players: [],
@@ -277,7 +300,6 @@
     currentGame: "1/3"
   };
 
-  // Elementos DOM
   const playersDiv = document.getElementById("players");
   const countSel = document.getElementById("count");
   const undoBtn = document.getElementById("undo");
@@ -285,26 +307,20 @@
   const modalText = document.getElementById("modalText");
   const modalInput = document.getElementById("modalInput");
   const modalActions = document.getElementById("modalActions");
-  const gameSelect = document.getElementById("gameSelect");
+  const gameSelector = document.getElementById("gameSelector");
+  const resetBtn = document.getElementById("resetBtn");
 
-  // Guardar estado
   function save() {
     localStorage.setItem("telefuker", JSON.stringify(state));
   }
-
-  // Guardar snapshot para deshacer
   function snapshot() {
     state.history.push(JSON.stringify(state));
     undoBtn.disabled = false;
   }
 
-  // Renderizar UI
   function render() {
     playersDiv.innerHTML = "";
     if (!state.count) return;
-
-    // Actualiza selección juego
-    gameSelect.value = state.currentGame;
 
     state.players.forEach((p, i) => {
       const d = document.createElement("div");
@@ -315,18 +331,19 @@
       } else if (p.disabled) d.classList.add("disabled");
 
       d.innerHTML = `
-        <div class="name-block">
-          <input class="name" value="${p.name}" />
-          <div class="entradas">Compras: ${p.buy || 10}</div>
-        </div>
-        <div class="divider"></div>
-        <div class="score-zone">
-          <div class="score">${p.score}</div>
-        </div>
-        <div class="buy-controls">
-          <button class="btn-use-buy" onclick="useBuy(${i})" ${p.buy === 0 ? "disabled" : ""}>USAR COMPRA</button>
-          <button class="btn-add-buy" onclick="addBuy(${i})">+1</button>
-        </div>
+      <div class="name-block">
+        <input class="name" value="${p.name}" />
+        ${p.entradas ? `<div class="entradas">ENTRADAS: ${p.entradas}</div>` : ""}
+      </div>
+      <div class="divider"></div>
+      <div class="score-zone">
+        <div class="score ${p.out ? "out" : ""}">${p.score}</div>
+        ${state.winner === i ? '<div class="winner-label">GANADOR</div>' : ""}
+      </div>
+      <div class="purchase-controls">
+        <button class="btn-use-purchase" data-index="${i}" ${p.purchases === 0 ? "disabled" : ""}>USAR COMPRA (${p.purchases})</button>
+        <button class="btn-add-purchase" data-index="${i}">+1</button>
+      </div>
       `;
 
       const nameInput = d.querySelector(".name");
@@ -336,113 +353,104 @@
         save();
       };
 
-      d.querySelector(".score-zone").onclick = () => openScore(i);
+      d.querySelector(".score-zone").onclick = () => {
+        openScore(i);
+      };
+
+      d.querySelector(".btn-use-purchase").onclick = (e) => {
+        const idx = parseInt(e.target.dataset.index);
+        usePurchase(idx);
+      };
+      d.querySelector(".btn-add-purchase").onclick = (e) => {
+        const idx = parseInt(e.target.dataset.index);
+        addPurchase(idx);
+      };
 
       playersDiv.appendChild(d);
     });
+
+    gameSelector.value = state.currentGame;
   }
 
-  // Abrir modal para puntaje
   function openScore(i) {
-    if (state.winner !== null) return;
     modalText.textContent = "Puntos";
     modalInput.style.display = "block";
     modalInput.value = "";
     modal.style.display = "flex";
     modalInput.focus();
-
     modalActions.innerHTML = `
-      <button onclick="apply(${i},1)">SUMAR</button>
-      <button onclick="apply(${i},-1)">RESTAR</button>
-      <button onclick="cancelModal()">CANCELAR</button>
+      <button onclick="apply(${i}, 1)">SUMAR</button>
+      <button onclick="apply(${i}, -1)">RESTAR</button>
     `;
   }
 
-  // Aplicar suma o resta
   function apply(i, m) {
     const v = parseInt(modalInput.value);
     if (isNaN(v)) return;
     snapshot();
-    const p = state.players[i];
-    p.score += v * m;
+    state.players[i].score += v * m;
     modal.style.display = "none";
-    checkState();
     save();
     render();
   }
 
-  // Cancelar modal
-  function cancelModal() {
-    modal.style.display = "none";
-  }
-
-  // Usar compra
-  function useBuy(i) {
-    if (state.players[i].buy <= 0) return;
+  function usePurchase(i) {
+    if (state.players[i].purchases <= 0) return;
     snapshot();
-    state.players[i].buy--;
+    state.players[i].purchases--;
+    modal.style.display = "none";
     save();
     render();
   }
 
-  // Añadir compra con confirmación
-  function addBuy(i) {
-    if (confirm("¿Agregar 1 compra para este jugador?")) {
-      snapshot();
-      if (!state.players[i].buy) state.players[i].buy = 0;
-      state.players[i].buy++;
-      save();
-      render();
-    }
+  function addPurchase(i) {
+    if (!confirm("¿Desea agregar una compra?")) return;
+    snapshot();
+    state.players[i].purchases++;
+    save();
+    render();
   }
 
-  // Comprobar estado ganador
-  function checkState() {
-    // La lógica ganadora no aplica puntos negativos ni eliminación.
-    // Sólo se puede determinar ganador tras las partidas según puntajes.
-
-    // Por ahora no hacemos nada aquí.
-  }
-
-  // Evento para cambiar cantidad jugadores
   countSel.onchange = () => {
     state.count = parseInt(countSel.value);
     state.players = [];
-    state.winner = null;
-    state.history = [];
-    state.currentGame = "1/3";
     for (let i = 0; i < state.count; i++) {
-      state.players.push({ name: `NOMBRE ${i + 1}`, score: 0, buy: 10, disabled: false });
+      state.players.push({
+        name: `NOMBRE ${i + 1}`,
+        score: 0,
+        entradas: 0,
+        disabled: false,
+        out: false,
+        purchases: 10
+      });
     }
+    state.winner = null;
     save();
     render();
-    undoBtn.disabled = true;
   };
 
-  // Evento para cambiar juego
-  gameSelect.onchange = () => {
-    state.currentGame = gameSelect.value;
-    save();
-  };
-
-  // Deshacer
   undoBtn.onclick = () => {
     if (!state.history.length) return;
     state = JSON.parse(state.history.pop());
     save();
     render();
-    if (state.history.length === 0) undoBtn.disabled = true;
+    if (!state.history.length) undoBtn.disabled = true;
   };
 
-  // Reiniciar juego con confirmación
-  function resetGame() {
+  gameSelector.onchange = () => {
+    state.currentGame = gameSelector.value;
+    save();
+  };
+
+  resetBtn.onclick = () => {
     if (confirm("¿Reiniciar juego?")) {
       localStorage.removeItem("telefuker");
       location.reload();
     }
-  }
+  };
 
   render();
+
 </script>
 </body>
 </html>
