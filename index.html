@@ -29,15 +29,13 @@
     padding: 0 12px;
     margin-bottom: 10px;
   }
-  /* Contenedor controles izq (jugadores + deshacer) */
   .left-controls {
     display: flex;
     gap: 12px;
   }
-  /* Contenedor controles der (juegos) */
   .right-controls {
-    max-width: 260px; /* limita para que no se salga */
-    width: 100%;
+    min-width: 240px;
+    max-width: 240px;
     background: #0a3c0a;
     border: 2px solid #0f7c0f;
     border-radius: 8px;
@@ -80,8 +78,7 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0,1fr));
     grid-template-rows: repeat(3, 1fr);
-    /* reducimos un poco la altura para dejar espacio al botón reiniciar */
-    height: calc(100vh - 140px);
+    height: calc(100vh - 170px); /* reducido para que botón quede visible */
     width: 100%;
     padding: 0 8px;
     overflow: hidden;
@@ -145,7 +142,7 @@
     min-width: 0;
   }
   .score {
-    font-size: 72px; /* confirmado */
+    font-size: 72px;
     font-weight: bold;
     word-break: break-word;
     user-select: none;
@@ -162,7 +159,7 @@
   .bottom {
     display: flex;
     justify-content: center;
-    padding: 10px;
+    padding: 10px 0;
   }
   /* MODAL */
   .modal {
@@ -194,13 +191,14 @@
   .modal-actions {
     display: flex;
     gap: 10px;
-    justify-content: center;
+    max-width: 280px;
+    margin: 0 auto;
   }
   .modal-actions button {
     flex: 1;
-    max-width: 90px; /* igual ancho */
     padding: 10px 0;
     font-weight: bold;
+    max-width: 90px;
   }
   .btn-yes {
     border-color: #2f6b3f;
@@ -210,8 +208,6 @@
     border-color: #6b2f2f;
     color: #e5a0a0;
   }
-
-  /* Controles para comprar */
   .buy-controls {
     display: flex;
     justify-content: center;
@@ -264,7 +260,6 @@
 </div>
 
 <script>
-  // Estado inicial o guardado
   let state = JSON.parse(localStorage.getItem("telefuker")) || {
     count: 0,
     players: [],
@@ -273,7 +268,6 @@
     currentGame: "1/3"
   };
 
-  // Elementos DOM
   const playersDiv = document.getElementById("players");
   const countSel = document.getElementById("count");
   const undoBtn = document.getElementById("undo");
@@ -283,29 +277,22 @@
   const modalActions = document.getElementById("modalActions");
   const gameSelect = document.getElementById("gameSelect");
 
-  // Guardar estado
   function save() {
     localStorage.setItem("telefuker", JSON.stringify(state));
   }
 
-  // Guardar snapshot para deshacer
   function snapshot() {
     state.history.push(JSON.stringify(state));
     undoBtn.disabled = false;
   }
 
-  // Renderizar UI
   function render() {
     playersDiv.innerHTML = "";
     if (!state.count) return;
 
-    // Actualiza selección juego
     gameSelect.value = state.currentGame;
 
     state.players.forEach((p, i) => {
-      // Asegurar buy es número y mínimo 0
-      if (typeof p.buy !== "number" || p.buy < 0) p.buy = 0;
-
       const d = document.createElement("div");
       d.className = "player";
       if (state.winner !== null) {
@@ -316,7 +303,7 @@
       d.innerHTML = `
         <div class="name-block">
           <input class="name" value="${p.name}" />
-          <div class="entradas">Compras: ${p.buy}</div>
+          <div class="entradas">Compras: ${p.buy || 10}</div>
         </div>
         <div class="divider"></div>
         <div class="score-zone">
@@ -341,7 +328,6 @@
     });
   }
 
-  // Abrir modal para puntaje
   function openScore(i) {
     if (state.winner !== null) return;
     modalText.textContent = "Puntos";
@@ -350,13 +336,13 @@
     modal.style.display = "flex";
     modalInput.focus();
 
+    // Solo sumar y restar, sin cancelar
     modalActions.innerHTML = `
       <button onclick="apply(${i},1)">SUMAR</button>
       <button onclick="apply(${i},-1)">RESTAR</button>
     `;
   }
 
-  // Aplicar suma o resta
   function apply(i, m) {
     const v = parseInt(modalInput.value);
     if (isNaN(v)) return;
@@ -364,33 +350,34 @@
     const p = state.players[i];
     p.score += v * m;
     modal.style.display = "none";
+    checkState();
     save();
     render();
   }
 
-  // Usar compra
   function useBuy(i) {
-    const p = state.players[i];
-    if (p.buy <= 0) return;
+    if (state.players[i].buy <= 0) return;
     snapshot();
-    p.buy--;
+    state.players[i].buy--;
+    if(state.players[i].buy < 0) state.players[i].buy = 0; // límite 0
     save();
     render();
   }
 
-  // Añadir compra con confirmación
   function addBuy(i) {
     if (confirm("¿Agregar 1 compra para este jugador?")) {
       snapshot();
-      const p = state.players[i];
-      if (typeof p.buy !== "number") p.buy = 0;
-      p.buy++;
+      if (!state.players[i].buy) state.players[i].buy = 0;
+      state.players[i].buy++;
       save();
       render();
     }
   }
 
-  // Evento para cambiar cantidad jugadores
+  function checkState() {
+    // Sin lógica de ganador por ahora
+  }
+
   countSel.onchange = () => {
     state.count = parseInt(countSel.value);
     state.players = [];
@@ -405,13 +392,11 @@
     undoBtn.disabled = true;
   };
 
-  // Evento para cambiar juego
   gameSelect.onchange = () => {
     state.currentGame = gameSelect.value;
     save();
   };
 
-  // Deshacer
   undoBtn.onclick = () => {
     if (!state.history.length) return;
     state = JSON.parse(state.history.pop());
@@ -420,7 +405,6 @@
     if (state.history.length === 0) undoBtn.disabled = true;
   };
 
-  // Reiniciar juego con confirmación
   function resetGame() {
     if (confirm("¿Reiniciar juego?")) {
       localStorage.removeItem("telefuker");
@@ -430,5 +414,6 @@
 
   render();
 </script>
+
 </body>
 </html>
