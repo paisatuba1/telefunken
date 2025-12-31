@@ -125,7 +125,7 @@
     cursor: pointer;
   }
   .score {
-    font-size: 72px; /* fuente grande */
+    font-size: 72px; /* Ajustado a 72px */
     font-weight: bold;
     word-break: break-word;
   }
@@ -146,7 +146,7 @@
     font-weight: bold;
     user-select: none;
   }
-  .btn-compra-container {
+  .btn-compra-group {
     margin-top: 8px;
     display: flex;
     gap: 8px;
@@ -162,35 +162,35 @@
     font-size: 14px;
     cursor: pointer;
     user-select: none;
-    transition: background-color 0.2s;
+    transition: background 0.2s ease;
   }
-  .btn-compra:hover:not(:disabled), .btn-add-compra:hover {
-    background: #d49500;
-  }
-  .btn-compra:disabled {
+  .btn-compra:disabled, .btn-add-compra:disabled {
     background: #555;
     cursor: default;
+  }
+  .btn-compra:hover:not(:disabled),
+  .btn-add-compra:hover:not(:disabled) {
+    background: #ffb84d;
+    color: #000;
   }
   .bottom {
     display: flex;
     justify-content: center;
     padding: 10px;
   }
-  /* Selector juegos - borde verde y texto centrado */
+  /* Estilo para el selector de juegos */
   #game-select {
-    border: 2px solid #4caf50;
+    border: 2px solid #4CAF50; /* borde verde */
     border-radius: 6px;
+    background: #000;
+    color: #fff;
     padding: 8px 12px;
     font-weight: bold;
-    color: #4caf50;
-    background: #000;
-    text-align-last: center; /* para Firefox */
-    text-align: center;
-    cursor: pointer;
-    min-width: 130px;
+    font-size: 16px;
+    text-align-last: center; /* centra el texto en algunos navegadores */
   }
+  /* Para navegadores que no soportan text-align-last */
   #game-select option {
-    color: #000;
     text-align: center;
   }
   .modal {
@@ -313,7 +313,7 @@
       const opt = document.createElement("option");
       opt.value = i;
       opt.textContent = g;
-      if(i === state.currentGameIndex) opt.selected = true;
+      if (i === state.currentGameIndex) opt.selected = true;
       gameSelect.appendChild(opt);
     });
   }
@@ -337,14 +337,14 @@
       }
       d.innerHTML = `
         <div class="name-block">
-          <input class="name" value="${p.name}" aria-label="Nombre jugador ${i+1}">
+          <input class="name" value="${p.name}" aria-label="Nombre jugador ${i + 1}">
         </div>
         <div class="divider"></div>
         <div class="score-zone" tabindex="0" aria-label="Puntaje de ${p.name}">${p.score}</div>
         <div class="compras">Compras: ${p.compras}</div>
-        <div class="btn-compra-container">
+        <div class="btn-compra-group">
           <button class="btn-compra" ${p.compras <= 0 || state.winner !== null ? 'disabled' : ''} aria-label="Usar compra de ${p.name}">USAR COMPRA</button>
-          <button class="btn-add-compra" aria-label="Agregar compra a ${p.name}">+1</button>
+          <button class="btn-add-compra" ${state.winner !== null ? 'disabled' : ''} aria-label="Agregar compra a ${p.name}">+1</button>
         </div>
       `;
 
@@ -374,38 +374,16 @@
       const btnAddCompra = d.querySelector(".btn-add-compra");
       btnAddCompra.onclick = () => {
         if (state.winner !== null) return;
-        modalText.textContent = `¿Confirmas agregar 1 compra a ${p.name}?`;
-        modalInput.style.display = "none";
-        modal.style.display = "flex";
-        modalActions.innerHTML = `
-          <button class="btn-yes" id="confirmAddCompra">SI</button>
-          <button class="btn-no" id="cancelAddCompra">NO</button>
-        `;
-
-        function confirmAdd() {
+        if (confirm(`¿Agregar 1 compra a ${p.name}?`)) {
           snapshot();
           p.compras++;
           save();
           render();
-          closeModal();
         }
-
-        function cancelAdd() {
-          closeModal();
-        }
-
-        document.getElementById("confirmAddCompra").onclick = confirmAdd;
-        document.getElementById("cancelAddCompra").onclick = cancelAdd;
       };
 
       playersDiv.appendChild(d);
     });
-  }
-
-  function closeModal() {
-    modal.style.display = "none";
-    modalInput.value = "";
-    modalActions.innerHTML = "";
   }
 
   function openScore(i) {
@@ -482,7 +460,7 @@
   gameSelect.onchange = () => {
     snapshot();
     state.currentGameIndex = parseInt(gameSelect.value);
-    state.winner = null; // reset ganador si cambio juego manual
+    state.winner = null;
     save();
     render();
   };
