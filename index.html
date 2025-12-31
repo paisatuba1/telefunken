@@ -6,284 +6,334 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
 <style>
-  * {
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-  }
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
 
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: #000;
-    color: #fff;
-    min-height: 100vh;
-    overflow-x: hidden; /* evita desbordes horizontales */
-  }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden; /* prevenir desbordes laterales */
+}
 
-  h1 {
-    text-align: center;
-    letter-spacing: 4px;
-    margin: 15px 0;
-    user-select: none;
-  }
+h1 {
+  text-align: center;
+  letter-spacing: 4px;
+  margin: 15px 0;
+}
 
-  .top-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 10px;
-    margin-bottom: 10px;
-    gap: 20px;
-  }
+/* CONTROLES SUPERIORES */
+.top-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  margin-bottom: 10px;
+  user-select: none;
+}
 
-  .left-controls {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
+.left-controls,
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  select, button {
-    background: #000;
-    color: #fff;
-    border: 1px solid #333;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 16px;
-  }
+.left-controls > * {
+  min-width: 100px;
+}
 
-  button {
-    cursor: pointer;
-  }
+select, button {
+  background: #000;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 16px;
+}
 
-  button:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
+button {
+  cursor: pointer;
+  user-select: none;
+}
 
-  .btn-undo {
-    border-color: #b36b00;
-    color: #ffb84d;
-  }
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
 
-  .btn-reset {
-    border-color: #6b2f2f;
-    color: #e5a0a0;
-  }
+/* Botones específicos */
+.btn-undo {
+  border-color: #b36b00;
+  color: #ffb84d;
+}
 
-  .btn-use-purchase {
-    border-color: #2f6b3f;
-    color: #9be5b1;
-  }
+.btn-reset {
+  border-color: #6b2f2f;
+  color: #e5a0a0;
+  margin: 10px auto 0 auto;
+  display: block;
+  min-width: 120px;
+  padding: 10px 15px;
+  font-weight: bold;
+  font-size: 18px;
+}
 
-  .btn-add-purchase {
-    border-color: #1f4e7f;
-    color: #91c2ff;
-  }
+/* Botón juegos */
+#gameSelector {
+  border: 2px solid #2f6b3f;
+  background: transparent;
+  color: #9be5b1;
+  font-weight: bold;
+  padding: 8px 15px;
+  border-radius: 6px;
+  min-width: 140px;
+  text-align: center;
+}
 
-  /* GRID BLINDADO */
-  .players {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr)); /* evita desborde */
-    grid-template-rows: repeat(3, 1fr);
-    height: calc(100vh - 170px);
-    width: 100%;
-    padding: 0 2px; /* margen mínimo */
-    overflow: hidden;
-  }
+/* JUEGOS - contenedor verde */
+.game-box {
+  border: 3px solid #2f6b3f;
+  border-radius: 8px;
+  padding: 8px 0;
+  min-width: 140px;
+  display: flex;
+  justify-content: center;
+  user-select: none;
+  font-weight: bold;
+  color: #9be5b1;
+  font-size: 16px;
+}
 
-  .player {
-    border: 1px solid #222;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    transition: 0.3s;
-    min-width: 0; /* clave para evitar overflow */
-  }
+/* GRID JUGADORES */
+.players {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(3, 1fr);
+  height: calc(100vh - 180px);
+  width: 100%;
+  padding: 0 10px;
+  gap: 8px;
+  overflow: hidden;
+}
 
-  .player.disabled {
-    opacity: 0.35;
-    pointer-events: none;
-  }
+/* Casillas jugador */
+.player {
+  border: 1px solid #222;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  transition: 0.3s;
+  min-width: 0;
+  user-select: none;
+  background: #111;
+  border-radius: 8px;
+  position: relative;
+}
 
-  .player.winner {
-    border: 2px solid #d4af37;
-  }
+.player.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
 
-  .name-block {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+.player.winner {
+  border: 2px solid #d4af37;
+}
 
-  .name {
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    background: transparent;
-    border: none;
-    color: #fff;
-    outline: none;
-    text-transform: uppercase;
-    width: 100%;
-  }
+.name-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 6px;
+}
 
-  .entradas {
-    margin-top: 4px;
-    background: #ffeb3b;
-    color: #000;
-    font-size: 14px;
-    padding: 2px 6px;
-    border-radius: 6px;
-  }
+.name {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  background: transparent;
+  border: none;
+  color: #fff;
+  outline: none;
+  text-transform: uppercase;
+  width: 100%;
+  user-select: text;
+  cursor: text;
+}
 
-  .divider {
-    height: 1px;
-    background: #333;
-    margin: 8px 0;
-  }
+.entradas {
+  margin-top: 4px;
+  background: #ffeb3b;
+  color: #000;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  user-select: none;
+}
 
-  .score-zone {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  }
+.divider {
+  height: 1px;
+  background: #333;
+  margin: 8px 0;
+}
 
-  .score {
-    font-size: 72px;
-    font-weight: bold;
-    word-break: break-word; /* seguridad */
-  }
+.score-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
 
-  .score.out {
-    color: #e55353;
-  }
+.score {
+  font-size: 72px;
+  font-weight: bold;
+  word-break: break-word;
+}
 
-  .winner-label {
-    margin-top: 6px;
-    color: #d4af37;
-    font-weight: bold;
-    letter-spacing: 2px;
-  }
+.score.out {
+  color: #e55353;
+}
 
-  .bottom {
-    display: flex;
-    justify-content: center;
-    padding: 10px 0 10px 0;
-  }
+.winner-label {
+  margin-top: 6px;
+  color: #d4af37;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
 
-  /* MODAL */
-  .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
+.buy-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  user-select: none;
+}
 
-  .modal-box {
-    background: #111;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    width: 280px;
-  }
+.buy-button, .add-button {
+  padding: 6px 15px;
+  border-radius: 6px;
+  border: 1px solid;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  min-width: 110px;
+  user-select: none;
+}
 
-  .modal-box input {
-    width: 100%;
-    padding: 12px;
-    font-size: 22px;
-    text-align: center;
-    background: #000;
-    color: #fff;
-    border: 1px solid #333;
-    margin-bottom: 12px;
-  }
+.buy-button {
+  background: #b36b00;
+  border-color: #ffb84d;
+  color: #fff;
+}
 
-  .modal-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+.buy-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
 
-  .modal-actions button {
-    padding: 8px;
-    font-size: 16px;
-  }
+.add-button {
+  background: #2f6b3f;
+  border-color: #9be5b1;
+  color: #9be5b1;
+}
 
-  .btn-yes {
-    border-color: #2f6b3f;
-    color: #9be5b1;
-  }
+/* BOTÓN REINICIAR en el fondo sin scroll */
+.bottom {
+  padding: 10px;
+  text-align: center;
+  position: sticky;
+  bottom: 0;
+  background: #000;
+  z-index: 10;
+}
 
-  .btn-no {
-    border-color: #6b2f2f;
-    color: #e5a0a0;
-  }
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  z-index: 20;
+}
 
-  /* Juego selector */
-  .game-selector {
-    border: 2px solid #2f6b3f;
-    color: #9be5b1;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 16px;
-    max-width: 210px;
-    text-align: center;
-    cursor: pointer;
-    user-select: none;
-  }
+.modal-box {
+  background: #111;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 280px;
+}
 
-  .game-selector select {
-    background: #000;
-    color: #9be5b1;
-    border: none;
-    font-size: 16px;
-    width: 100%;
-    text-align-last: center;
-    cursor: pointer;
-    user-select: none;
-  }
+.modal-box input {
+  width: 100%;
+  padding: 12px;
+  font-size: 22px;
+  text-align: center;
+  background: #000;
+  color: #fff;
+  border: 1px solid #333;
+  margin-bottom: 12px;
+  user-select: text;
+}
 
-  /* Botones compras alineados */
-  .purchase-controls {
-    display: flex;
-    gap: 10px;
-    margin-top: 6px;
-    justify-content: center;
-  }
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
 
-  /* Ajuste botón reiniciar para no quedar tan abajo */
-  .bottom {
-    padding: 10px 0;
-    position: sticky;
-    bottom: 0;
-    background: #000;
-    border-top: 1px solid #222;
-  }
+.modal-actions button {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 16px;
+  user-select: none;
+}
+
+.btn-yes {
+  border-color: #2f6b3f;
+  color: #9be5b1;
+  background: transparent;
+}
+
+.btn-no {
+  border-color: #6b2f2f;
+  color: #e5a0a0;
+  background: transparent;
+}
+
+/* Select games dropdown text centering */
+#gameSelector option {
+  text-align: center;
+  user-select: none;
+}
 </style>
 </head>
 
 <body>
-
 <h1>TELEFUKER</h1>
 
 <div class="top-controls">
   <div class="left-controls">
-    <select id="count">
-      <option value="">Jugadores</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
+    <select id="count" title="Cantidad de jugadores">
+      <option value="" disabled selected>Jugadores</option>
+      <option value="2">2</option><option value="3">3</option><option value="4">4</option>
     </select>
     <button class="btn-undo" id="undo" disabled>DESHACER</button>
   </div>
-
-  <div class="game-selector" id="gameSelector">
-    <select id="gameSelect" title="Selecciona juego">
+  <div class="right-controls">
+    <select id="gameSelector" title="Selecciona el juego">
       <option value="1/3">1/3</option>
       <option value="1/4">1/4</option>
       <option value="1/5">1/5</option>
@@ -312,6 +362,7 @@
 </div>
 
 <script>
+(() => {
   // Estado inicial o recuperado
   let state = JSON.parse(localStorage.getItem("telefuker")) || {
     count: 0,
@@ -328,82 +379,92 @@
   const modalText = document.getElementById("modalText");
   const modalInput = document.getElementById("modalInput");
   const modalActions = document.getElementById("modalActions");
-  const gameSelect = document.getElementById("gameSelect");
+  const gameSelector = document.getElementById("gameSelector");
   const resetBtn = document.getElementById("resetBtn");
 
+  // Guardar estado en localStorage
   function save() {
     localStorage.setItem("telefuker", JSON.stringify(state));
   }
 
+  // Guardar snapshot para deshacer
   function snapshot() {
     state.history.push(JSON.stringify(state));
     undoBtn.disabled = false;
   }
 
-  function render() {
+  // Renderiza la interfaz de jugadores
+  function renderPlayers() {
     playersDiv.innerHTML = "";
     if (!state.count) return;
 
     state.players.forEach((p, i) => {
-      const d = document.createElement("div");
-      d.className = "player";
+      const div = document.createElement("div");
+      div.className = "player";
       if (state.winner !== null) {
-        if (i === state.winner) d.classList.add("winner");
-        else d.classList.add("disabled");
-      } else if (p.disabled) d.classList.add("disabled");
+        if (i === state.winner) div.classList.add("winner");
+        else div.classList.add("disabled");
+      } else if (p.disabled) {
+        div.classList.add("disabled");
+      }
 
-      d.innerHTML = `
+      div.innerHTML = `
         <div class="name-block">
-          <input class="name" value="${p.name}" maxlength="15" />
-          <div class="divider"></div>
-          <div class="score-zone">
-            <div class="score">${p.score}</div>
-          </div>
-          <div class="purchase-controls">
-            <button class="btn-use-purchase" ${p.purchases === 0 ? "disabled" : ""} onclick="usePurchase(${i})">USAR COMPRA (${p.purchases})</button>
-            <button class="btn-add-purchase" onclick="addPurchase(${i})">+1</button>
-          </div>
+          <input class="name" value="${p.name}" title="Editar nombre" />
+          <div class="entradas">Compras: ${p.purchases}</div>
+        </div>
+        <div class="divider"></div>
+        <div class="score-zone" title="Click para sumar o restar puntos">
+          <div class="score ${p.out ? "out" : ""}">${p.score}</div>
+          ${state.winner === i ? '<div class="winner-label">GANADOR</div>' : ""}
+        </div>
+        <div class="buy-controls">
+          <button class="buy-button" data-index="${i}" ${p.purchases === 0 ? "disabled" : ""}>USAR COMPRA</button>
+          <button class="add-button" data-index="${i}">+1</button>
         </div>
       `;
 
-      const nameInput = d.querySelector(".name");
-      nameInput.onfocus = (e) => e.target.select();
-      nameInput.oninput = (e) => {
-        p.name = e.target.value.toUpperCase();
+      // Nombre editable - mayúsculas y selección inmediata
+      const nameInput = div.querySelector(".name");
+      nameInput.onfocus = e => e.target.select();
+      nameInput.oninput = e => {
+        state.players[i].name = e.target.value.toUpperCase();
         save();
       };
 
-      playersDiv.appendChild(d);
+      // Eventos botones comprar/restar compra
+      div.querySelector(".buy-button").onclick = () => {
+        if (state.players[i].purchases > 0) {
+          snapshot();
+          state.players[i].purchases--;
+          save();
+          render();
+        }
+      };
+
+      div.querySelector(".add-button").onclick = () => {
+        const confirmed = confirm(`¿Desea agregar una compra a ${state.players[i].name}?`);
+        if (confirmed) {
+          snapshot();
+          state.players[i].purchases++;
+          save();
+          render();
+        }
+      };
+
+      // Evento click en puntaje para sumar/restar
+      div.querySelector(".score-zone").onclick = () => openScore(i);
+
+      playersDiv.appendChild(div);
     });
-
-    // Actualizar selector de jugadores
-    countSel.value = state.count;
-
-    // Actualizar undo botón
-    undoBtn.disabled = state.history.length === 0;
-
-    // Actualizar juego seleccionado
-    gameSelect.value = state.currentGame;
   }
 
-  function usePurchase(i) {
-    if (state.players[i].purchases > 0) {
-      snapshot();
-      state.players[i].purchases--;
-      save();
-      render();
-    }
+  // Render juegos seleccionados
+  function renderGameSelector() {
+    gameSelector.value = state.currentGame || "1/3";
   }
 
-  function addPurchase(i) {
-    if (confirm(`¿Agregar 1 compra a ${state.players[i].name}?`)) {
-      snapshot();
-      state.players[i].purchases++;
-      save();
-      render();
-    }
-  }
-
+  // Abrir modal para sumar/restar puntos
   function openScore(i) {
     modalText.textContent = `Puntos para ${state.players[i].name}`;
     modalInput.style.display = "block";
@@ -416,40 +477,64 @@
     `;
   }
 
-  function apply(i, m) {
+  // Aplicar suma o resta de puntos (sin cancelar)
+  window.apply = function(i, m) {
     const v = parseInt(modalInput.value);
     if (isNaN(v)) return;
     snapshot();
     state.players[i].score += v * m;
     modal.style.display = "none";
+    checkWinner();
     save();
-    render();
+    renderPlayers();
+  };
+
+  // Chequear si hay ganador
+  function checkWinner() {
+    // Ganador es quien tiene el puntaje más alto (según reglas juego)
+    // No se inhabilitan jugadores al superar puntos
+
+    // Para esta versión, no hay condición de bloqueo ni reingreso
+    // Se puede agregar lógica para determinar ganador de partida completa si quieres
+
+    // Por ahora no se marca ganador automático
+    state.winner = null;
   }
 
+  // Cambiar cantidad de jugadores
   countSel.onchange = () => {
     state.count = parseInt(countSel.value);
     state.players = [];
     for (let i = 0; i < state.count; i++) {
-      state.players.push({ name: `NOMBRE ${i + 1}`, score: 0, purchases: 10, disabled: false });
+      state.players.push({
+        name: `NOMBRE ${i + 1}`,
+        score: 0,
+        purchases: 10,
+        disabled: false,
+        out: false,
+      });
     }
     state.winner = null;
     save();
-    render();
+    renderPlayers();
   };
 
+  // Undo
   undoBtn.onclick = () => {
     if (!state.history.length) return;
     state = JSON.parse(state.history.pop());
+    undoBtn.disabled = state.history.length === 0;
     save();
-    render();
+    renderPlayers();
   };
 
-  gameSelect.onchange = () => {
-    snapshot();
-    state.currentGame = gameSelect.value;
+  // Cambio de juego
+  gameSelector.onchange = () => {
+    state.currentGame = gameSelector.value;
     save();
   };
 
+  // Reset
   resetBtn.onclick = () => {
     if (confirm("¿Reiniciar juego?")) {
       localStorage.removeItem("telefuker");
@@ -457,15 +542,22 @@
     }
   };
 
-  render();
-
-  // Cierra modal al hacer click afuera
-  window.onclick = function (e) {
+  // Cerrar modal al hacer click afuera o fuera del input
+  modal.onclick = (e) => {
     if (e.target === modal) {
       modal.style.display = "none";
     }
   };
-</script>
 
+  // Evitar que modal cierre con click dentro del contenido
+  document.querySelector(".modal-box").onclick = (e) => {
+    e.stopPropagation();
+  };
+
+  // Guardar estado y renderizar inicial
+  renderPlayers();
+  renderGameSelector();
+})();
+</script>
 </body>
 </html>
