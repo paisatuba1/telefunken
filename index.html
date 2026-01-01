@@ -55,7 +55,7 @@
   }
   
   .right-controls select {
-    background: transparent;
+    background: #063106;
     color: #fff;
     border: none;
     font-weight: bold;
@@ -63,6 +63,19 @@
     padding: 6px 4px;
     outline: none;
     appearance: none;
+  }
+
+  /* Estilos específicos para las opciones del selector de juegos */
+  #gameSelect option {
+    background: #111;
+    color: #fff;
+  }
+  #gameSelect option.completed {
+    color: #555;
+  }
+  #gameSelect option.active {
+    color: #9be5b1;
+    font-weight: bold;
   }
 
   select, button {
@@ -152,7 +165,6 @@
     font-size: 12px; 
     font-weight: bold;
   }
-  /* Estilo para botón comprar deshabilitado */
   .btn-use-buy:disabled {
     border-color: #444;
     color: #666;
@@ -233,16 +245,7 @@
     <button class="btn-undo" id="undoBtn" disabled>DESHACER</button>
     <div class="right-controls" id="gameGroup">
       <select id="gameSelect">
-        <option value="1/3">1/3</option>
-        <option value="1/4">1/4</option>
-        <option value="1/5">1/5</option>
-        <option value="2/3">2/3</option>
-        <option value="1/3 1/4">1/3 1/4</option>
-        <option value="2/4">2/4</option>
-        <option value="1/4 1/5">1/4 1/5</option>
-        <option value="2/5">2/5</option>
-        <option value="Escalera">Escalera</option>
-      </select>
+        </select>
     </div>
   </div>
   
@@ -276,6 +279,8 @@
 
 <script>
 (() => {
+  const GAMES_LIST = ["1/3", "1/4", "1/5", "2/3", "1/3 1/4", "2/4", "1/4 1/5", "2/5", "Escalera"];
+
   let state = JSON.parse(localStorage.getItem("telefuker_v5")) || {
     count: 0,
     players: [],
@@ -307,12 +312,33 @@
     undoBtn.disabled = false;
   }
 
+  function updateGameSelector() {
+    const currentIndex = GAMES_LIST.indexOf(state.currentGame);
+    gameSelect.innerHTML = "";
+    
+    GAMES_LIST.forEach((game, index) => {
+      const option = document.createElement("option");
+      option.value = game;
+      
+      if (index < currentIndex) {
+        option.textContent = `✓ ${game}`;
+        option.className = "completed";
+      } else if (index === currentIndex) {
+        option.textContent = `> ${game} <`;
+        option.className = "active";
+      } else {
+        option.textContent = game;
+      }
+      gameSelect.appendChild(option);
+    });
+    gameSelect.value = state.currentGame;
+  }
+
   function render() {
     container.innerHTML = "";
     countSelect.value = state.count;
     
     if (state.count === 0) {
-      // Bloquear controles en modo INICIO
       finishBtn.style.opacity = "0.2";
       finishBtn.disabled = true;
       undoBtn.style.opacity = "0.2";
@@ -322,14 +348,13 @@
       return;
     }
 
-    // Activar controles en partida
     finishBtn.style.opacity = "1";
     finishBtn.disabled = false;
     undoBtn.style.opacity = state.history.length > 0 ? "1" : "0.5";
     undoBtn.disabled = state.history.length === 0;
     gameGroup.style.opacity = "1";
     gameSelect.disabled = false;
-    gameSelect.value = state.currentGame;
+    updateGameSelector();
 
     state.players.forEach((p, i) => {
       const card = document.createElement("div");
@@ -419,7 +444,11 @@
     }
   };
 
-  gameSelect.onchange = () => { state.currentGame = gameSelect.value; save(); };
+  gameSelect.onchange = () => { 
+    state.currentGame = gameSelect.value; 
+    save(); 
+    updateGameSelector(); 
+  };
 
   undoBtn.onclick = () => {
     if (state.history.length > 0) {
@@ -462,7 +491,6 @@
         list.innerHTML = "<p style='color:#666'>No hay datos registrados.</p>";
     } else {
         let html = '<table class="consolidado-table">';
-        // Si estamos en INICIO, mostramos nombres genéricos si no hay jugadores definidos
         const displayPlayers = state.count === 0 ? [1,2,3,4] : state.players;
         displayPlayers.forEach((p, i) => {
           const name = state.count === 0 ? `JUGADOR ${i+1}` : p.name;
