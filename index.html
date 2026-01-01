@@ -5,77 +5,107 @@
 <title>TELEFUKER</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
-*{box-sizing:border-box;font-family:Arial,sans-serif}
-html,body{margin:0;padding:0;background:#000;color:#fff;height:100vh;overflow:hidden}
+  * { box-sizing: border-box; font-family: Arial, sans-serif; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #000; color: #fff;
+    height: 100vh; overflow: hidden;
+  }
+  h1 {
+    text-align: center;
+    letter-spacing: 4px;
+    margin: 40px 0 15px 0;
+    user-select: none;
+    font-size: 24px;
+  }
 
-h1{
-  text-align:center;
-  letter-spacing:4px;
-  margin:40px 0 15px 0;
-  font-size:24px;
-}
+  .top-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 12px;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
 
-.top-controls{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:0 12px;
-  margin-bottom:10px;
-  gap:8px;
-}
+  select, button {
+    background: #000;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 16px;
+    cursor: pointer;
+  }
 
-select,button{
-  background:#000;
-  color:#fff;
-  border:1px solid #333;
-  border-radius:6px;
-  padding:8px 12px;
-  font-size:16px;
-  cursor:pointer;
-}
+  button:disabled { opacity: 0.4; }
 
-.btn-undo{border-color:#b36b00;color:#ffb84d;font-size:24px}
-.btn-final{border-color:#2f6b3f;color:#9be5b1}
-.btn-reset{border-color:#6b2f2f;color:#e5a0a0;width:140px}
+  .btn-undo { border-color: #b36b00; color: #ffb84d; font-size: 22px; }
+  .btn-final { border-color: #444; color: #ccc; }
+  .btn-reset { border-color: #6b2f2f; color: #e5a0a0; width: 130px; }
 
-.players{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  padding:0 12px;
-  height:calc(100vh - 200px);
-}
+  .right-controls {
+    background: #0a3c0a;
+    border: 2px solid #0f7c0f;
+    border-radius: 8px;
+    padding: 6px 10px;
+    min-width: 140px;
+    text-align: center;
+  }
 
-.player{
-  border:1px solid #222;
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  background:#111;
-  border-radius:8px;
-}
+  .right-controls select {
+    background: transparent;
+    border: none;
+    color: #fff;
+    width: 100%;
+    text-align: center;
+  }
 
-.name{text-align:center;font-size:18px;font-weight:bold;background:none;border:none;color:#fff}
-.compras{margin-top:6px;background:#ffeb3b;color:#000;font-size:14px;padding:4px 10px;border-radius:6px}
+  .players {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 12px;
+    height: calc(100vh - 200px);
+  }
 
-.score-zone{flex:1;display:flex;align-items:center;justify-content:center}
-.score{font-size:72px;font-weight:bold}
+  .player {
+    border: 1px solid #222;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    background: #111;
+    border-radius: 8px;
+  }
 
-.buy-controls{display:flex;gap:10px;justify-content:center}
+  .name { text-align: center; font-size: 18px; font-weight: bold; background: transparent; border: none; color: #fff; }
+  .compras { margin-top: 6px; background: #ffeb3b; color: #000; padding: 4px 10px; border-radius: 6px; }
 
-.bottom{display:flex;justify-content:center;padding:10px}
+  .score-zone { flex: 1; display: flex; justify-content: center; align-items: center; }
+  .score { font-size: 72px; font-weight: bold; }
 
-.modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.9);
-  display:none;align-items:center;justify-content:center;z-index:999
-}
-.modal-box{
-  background:#111;padding:20px;border-radius:10px;width:90%;max-width:300px
-}
-.modal-actions{margin-top:15px;display:flex;gap:10px}
+  .buy-controls { display: flex; gap: 10px; justify-content: center; }
+
+  .bottom { display: flex; justify-content: center; padding: 10px; }
+
+  .modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-box {
+    background: #111;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 300px;
+    text-align: center;
+  }
 </style>
 </head>
-
 <body>
 
 <h1>TELEFUKER</h1>
@@ -90,11 +120,14 @@ select,button{
 
   <button class="btn-undo" id="undo" disabled>&larr;</button>
 
-  <select id="gameSelect">
-    <option>1/3</option><option>1/4</option><option>1/5</option>
-    <option>2/3</option><option>1/3 1/4</option><option>2/4</option>
-    <option>1/4 1/5</option><option>2/5</option><option>Escalera</option>
-  </select>
+  <div class="right-controls">
+    <select id="gameSelect">
+      <option>1/3</option><option>1/4</option><option>1/5</option>
+      <option>2/3</option><option>1/3 1/4</option>
+      <option>2/4</option><option>1/4 1/5</option>
+      <option>2/5</option><option>Escalera</option>
+    </select>
+  </div>
 
   <button class="btn-final" id="finalizar">FINALIZAR</button>
 </div>
@@ -106,101 +139,45 @@ select,button{
 </div>
 
 <div class="modal" id="modal">
-  <div class="modal-box">
-    <div id="modalContent"></div>
-    <div class="modal-actions">
-      <button onclick="closeModal()">CERRAR</button>
-    </div>
-  </div>
+  <div class="modal-box" id="modalBox"></div>
 </div>
 
 <script>
-let state = JSON.parse(localStorage.getItem("telefuker")) || {
-  count:0,
-  players:[],
-  history:[],
-  currentGame:"1/3"
-};
+(() => {
+  let state = JSON.parse(localStorage.getItem("telefuker")) || {
+    count: 0,
+    players: [],
+    history: [],
+    currentGame: "1/3"
+  };
 
-const playersDiv=document.getElementById("players");
-const modal=document.getElementById("modal");
-const modalContent=document.getElementById("modalContent");
+  const modal = document.getElementById("modal");
+  const modalBox = document.getElementById("modalBox");
 
-function save(){localStorage.setItem("telefuker",JSON.stringify(state))}
+  function save(){ localStorage.setItem("telefuker", JSON.stringify(state)); }
 
-function render(){
-  playersDiv.innerHTML="";
-  if(!state.count)return;
-
-  state.players.forEach((p,i)=>{
-    const d=document.createElement("div");
-    d.className="player";
-    d.innerHTML=`
-      <input class="name" value="${p.name}">
-      <div class="compras">Compras: ${p.buy}</div>
-      <div class="score-zone"><div class="score">${p.score}</div></div>
-      <div class="buy-controls">
-        <button onclick="useBuy(${i})">USAR</button>
-        <button onclick="addBuy(${i})">+1</button>
-      </div>
-    `;
-    d.querySelector(".name").oninput=e=>{
-      p.name=e.target.value.toUpperCase();save();
-    };
-    d.querySelector(".score-zone").onclick=()=>editScore(i);
-    playersDiv.appendChild(d);
-  });
-}
-
-function editScore(i){
-  const v=prompt("Puntos:");
-  if(v===null)return;
-  const n=parseInt(v);
-  if(isNaN(n))return;
-  state.players[i].score+=n;
-  save();render();
-}
-
-function useBuy(i){
-  if(state.players[i].buy<=0)return;
-  state.players[i].buy--;save();render();
-}
-
-function addBuy(i){
-  if(confirm("¿Agregar compra?")){
-    state.players[i].buy++;save();render();
+  function showConsolidado(){
+    let html = "<h3>CONSOLIDADO</h3>";
+    state.players.forEach(p=>{
+      html += `<p>${p.name}: ${p.wins || 0} partidas</p>`;
+    });
+    modalBox.innerHTML = html + `<br><button onclick="document.getElementById('modal').style.display='none'">OK</button>`;
+    modal.style.display="flex";
   }
-}
 
-document.getElementById("count").onchange=e=>{
-  const n=parseInt(e.target.value);
-  state.count=n;
-  state.players=[];
-  for(let i=0;i<n;i++){
-    state.players.push({name:`NOMBRE ${i+1}`,score:0,buy:10,wins:0});
-  }
-  save();render();
-};
+  document.getElementById("finalizar").onclick = () => {
+    const min = Math.min(...state.players.map(p=>p.score));
+    state.players.forEach(p=>{
+      if(p.score === min){
+        p.wins = (p.wins || 0) + 1;
+      }
+    });
+    save();
+    showConsolidado();
+  };
 
-document.getElementById("finalizar").onclick=()=>{
-  const min=Math.min(...state.players.map(p=>p.score));
-  state.players.forEach(p=>{if(p.score===min)p.wins++});
-  save();
-  showConsolidado();
-};
-
-document.getElementById("consolidado").onclick=showConsolidado;
-
-function showConsolidado(){
-  modalContent.innerHTML="<h3>CONSOLIDADO</h3>"+state.players.map(p=>
-    `<div>${p.name}: ${p.wins}</div>`
-  ).join("");
-  modal.style.display="flex";
-}
-
-function closeModal(){modal.style.display="none"}
-
-render();
+  document.getElementById("consolidado").onclick = showConsolidado;
+})();
 </script>
 
 </body>
