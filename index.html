@@ -29,37 +29,40 @@
     font-weight: 900;
   }
 
-  /* Fila de controles alineada */
+  /* Nueva Barra Superior Organizada */
   .top-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 10px;
     margin-bottom: 10px;
+    gap: 5px;
   }
   
   .controls-group-left {
     display: flex;
-    gap: 6px;
+    gap: 5px;
     align-items: center;
+    flex-wrap: nowrap;
   }
 
-  .game-container {
+  .right-controls {
     background: #063106;
     border: 1px solid #0f7c0f;
     border-radius: 6px;
-    padding: 0 4px;
+    display: flex;
+    align-items: center;
   }
   
-  .game-container select {
+  .right-controls select {
     background: transparent;
     color: #fff;
     border: none;
     font-weight: bold;
     font-size: 14px;
-    padding: 8px 4px;
-    appearance: none;
+    padding: 6px;
     outline: none;
+    appearance: none;
   }
 
   select, button {
@@ -70,35 +73,32 @@
     padding: 8px 10px;
     font-size: 14px;
     cursor: pointer;
+    white-space: nowrap;
   }
 
-  .btn-finish {
-    border-color: #2f4f6f;
-    color: #a0c4e5;
-  }
+  .btn-undo { border-color: #b36b00; color: #ffb84d; font-size: 18px; padding: 4px 12px; }
+  .btn-finalizar { border-color: #2f6b3f; color: #9be5b1; font-weight: bold; }
+  .btn-consolidado { border-color: #444; color: #fff; width: 160px; }
 
-  /* Grid de Jugadores con proporción 1:1.2 */
+  /* Grid de Jugadores con Proporción 1:1.2 */
   .players {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(2, 1fr); /* Ajustado para altura */
-    gap: 12px;
-    padding: 0 12px;
-    /* Aspect Ratio 1:1.2 aproximado mediante auto-rows */
-    grid-auto-rows: calc((50vw - 18px) * 1.2); 
-    height: calc(100vh - 200px);
+    gap: 10px;
+    padding: 0 10px;
+    height: calc(100vh - 190px);
     overflow-y: auto;
   }
 
   .player {
     border: 1px solid #222;
-    padding: 12px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
     background: #0a0a0a;
     border-radius: 10px;
     justify-content: space-between;
-    height: 100%; 
+    aspect-ratio: 1 / 1.2; /* Altura 1.2 veces el ancho */
   }
 
   .name {
@@ -107,7 +107,7 @@
     font-weight: bold;
     background: transparent;
     border: none;
-    color: #fff;
+    color: #aaa;
     outline: none;
     text-transform: uppercase;
     width: 100%;
@@ -120,6 +120,7 @@
     font-weight: bold;
     padding: 2px 6px;
     border-radius: 4px;
+    display: inline-block;
     margin-top: 4px;
   }
 
@@ -137,12 +138,15 @@
 
   .buy-controls {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 5px;
   }
 
+  .btn-use-buy { border-color: #cc6600; color: #ffb84d; font-size: 10px; padding: 5px 0; }
+  .btn-add-buy { border-color: #00662e; color: #94d48e; font-size: 10px; }
+
   .bottom-area {
-    height: 70px;
+    height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -159,13 +163,26 @@
   }
   .modal-box {
     background: #111;
-    padding: 20px;
+    padding: 25px;
     border-radius: 15px;
+    text-align: center;
     width: 85%;
     max-width: 300px;
     border: 1px solid #333;
-    text-align: center;
   }
+  .modal-box input {
+    width: 100%;
+    padding: 15px;
+    font-size: 32px;
+    text-align: center;
+    background: #000;
+    color: #fff;
+    border: 1px solid #444;
+    margin: 20px 0;
+    border-radius: 8px;
+  }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-actions button { flex: 1; padding: 15px 0; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -180,7 +197,7 @@
       <option value="3">3</option>
       <option value="4">4</option>
     </select>
-    <button id="undoBtn" disabled>&#10132;</button> <div class="game-container">
+    <button class="btn-undo" id="undoBtn" disabled>&#10132;</button> <div class="right-controls">
       <select id="gameSelect">
         <option value="1/3">1/3</option>
         <option value="1/4">1/4</option>
@@ -195,35 +212,34 @@
     </div>
   </div>
   
-  <button class="btn-finish" id="finishBtn">FINALIZAR</button>
+  <button class="btn-finalizar" id="finalizarBtn">FINALIZAR</button>
 </div>
 
 <div class="players" id="playersContainer"></div>
 
 <div class="bottom-area">
-  <button id="consolidadoBtn">CONSOLIDADO</button>
+  <button class="btn-consolidado" id="consolidadoBtn">CONSOLIDADO</button>
 </div>
 
 <div class="modal" id="scoreModal">
   <div class="modal-box">
-    <h2 id="modalPlayerName">PUNTOS</h2>
-    <input id="scoreInput" type="number" inputmode="numeric" style="width:100%; padding:15px; font-size:30px; background:#000; color:#fff; border:1px solid #444; margin:15px 0; text-align:center;"/>
-    <div style="display:flex; gap:10px;">
-      <button id="sumarBtn" style="flex:1; border-color:#2f6b3f; color:#9be5b1;">SUMAR</button>
-      <button id="restarBtn" style="flex:1; border-color:#6b2f2f; color:#e5a0a0;">RESTAR</button>
+    <h2 id="modalPlayerName" style="margin:0; font-size: 18px;">PUNTOS</h2>
+    <input id="scoreInput" type="number" inputmode="numeric" placeholder="0" />
+    <div class="modal-actions">
+      <button style="border-color:#2f6b3f; color:#9be5b1;" id="sumarBtn">SUMAR</button>
+      <button style="border-color:#6b2f2f; color:#e5a0a0;" id="restarBtn">RESTAR</button>
     </div>
   </div>
 </div>
 
 <script>
 (() => {
-  // Se agregó 'wins' al objeto de estado para el consolidado
   let state = JSON.parse(localStorage.getItem("telefuker_v3")) || {
     count: 0,
     players: [],
     history: [],
     currentGame: "1/3",
-    wins: {} // Formato { "NOMBRE JUGADOR": cantidad_ganadas }
+    victories: {} // Registro de victorias acumuladas
   };
 
   const container = document.getElementById("playersContainer");
@@ -234,20 +250,16 @@
   const scoreInput = document.getElementById("scoreInput");
   let activePlayerIndex = null;
 
-  // Estilo de flecha para el botón deshacer
-  undoBtn.style.transform = "scaleX(-1)"; 
-
   function save() {
     localStorage.setItem("telefuker_v3", JSON.stringify(state));
   }
 
   function snapshot() {
-    const snap = {
+    state.history.push({
       count: state.count,
       players: JSON.parse(JSON.stringify(state.players)),
       currentGame: state.currentGame
-    };
-    state.history.push(snap);
+    });
     if (state.history.length > 20) state.history.shift();
     undoBtn.disabled = false;
   }
@@ -262,7 +274,7 @@
       const card = document.createElement("div");
       card.className = "player";
       card.innerHTML = `
-        <div style="text-align:center">
+        <div class="name-block">
           <input class="name" value="${p.name}" data-index="${i}" spellcheck="false" />
           <div class="compras-indicator">COMPRAS: ${p.buy}</div>
         </div>
@@ -270,8 +282,8 @@
           <div class="score">${p.score}</div>
         </div>
         <div class="buy-controls">
-          <button style="border-color:#cc6600; color:#ffb84d; font-size:10px" ${p.buy <= 0 ? 'disabled' : ''} onclick="window.useBuy(${i})">USAR COMPRA</button>
-          <button style="border-color:#00662e; color:#94d48e;" onclick="window.window.addBuy(${i})">+1</button>
+          <button class="btn-use-buy" ${p.buy <= 0 ? 'disabled' : ''} onclick="window.useBuy(${i})">USAR COMPRA</button>
+          <button class="btn-add-buy" onclick="window.addBuy(${i})">+1</button>
         </div>
       `;
       container.appendChild(card);
@@ -281,7 +293,7 @@
       input.onfocus = (e) => e.target.select();
       input.onblur = (e) => {
         const idx = e.target.dataset.index;
-        state.players[idx].name = e.target.value.toUpperCase() || `NOMBRE ${parseInt(idx)+1}`;
+        state.players[idx].name = e.target.value.toUpperCase();
         save();
       };
     });
@@ -292,7 +304,8 @@
     document.getElementById("modalPlayerName").textContent = state.players[i].name;
     scoreInput.value = "";
     scoreModal.style.display = "flex";
-    setTimeout(() => scoreInput.focus(), 100);
+    // Autofocus y teclado numérico
+    setTimeout(() => scoreInput.focus(), 50);
   };
 
   window.useBuy = (i) => {
@@ -305,7 +318,7 @@
   };
 
   window.addBuy = (i) => {
-    if (confirm(`¿Agregar compra a ${state.players[i].name}?`)) {
+    if (confirm(`¿+1 compra para ${state.players[i].name}?`)) {
       snapshot();
       state.players[i].buy++;
       save();
@@ -331,19 +344,60 @@
     save(); render();
   };
 
-  countSelect.onchange = () => {
-    const n = parseInt(countSelect.value);
-    if (confirm("¿Cambiar jugadores? Se borrarán todos los datos actuales.")) {
-      state = {
-        count: n,
-        players: Array.from({length: n}, (_, i) => ({ name: `NOMBRE ${i + 1}`, score: 0, buy: 10 })),
-        history: [],
-        currentGame: "1/3",
-        wins: {}
-      };
+  document.getElementById("finalizarBtn").onclick = () => {
+    if (!state.players.length) return;
+    if (confirm("¿Finalizar partida actual? Se determinará un ganador.")) {
+      // Encontrar el menor puntaje
+      let winner = state.players[0];
+      state.players.forEach(p => {
+        if (p.score < winner.score) winner = p;
+      });
+
+      // Registrar victoria
+      state.victories[winner.name] = (state.victories[winner.name] || 0) + 1;
+
+      // Mostrar alerta consolidada
+      document.getElementById("consolidadoBtn").click();
+
+      // Reiniciar valores de partida
+      state.players.forEach(p => {
+        p.score = 0;
+        p.buy = 10;
+      });
+      state.currentGame = "1/3";
+      state.history = [];
+      undoBtn.disabled = true;
       save();
       render();
     }
+  };
+
+  document.getElementById("consolidadoBtn").onclick = () => {
+    let msg = "🏆 VICTORIAS ACUMULADAS:\n\n";
+    if (Object.keys(state.victories).length === 0) {
+      msg += "No hay victorias registradas aún.";
+    } else {
+      for (const [name, count] of Object.entries(state.victories)) {
+        msg += `${name}: ${count}\n`;
+      }
+    }
+    alert(msg);
+  };
+
+  countSelect.onchange = () => {
+    const n = parseInt(countSelect.value);
+    // Reiniciar y borrar datos al seleccionar jugadores (según punto 3)
+    state.history = [];
+    state.count = n;
+    state.victories = {}; // Borra consolidado al cambiar jugadores
+    state.players = Array.from({length: n}, (_, i) => ({
+      name: `NOMBRE ${i + 1}`,
+      score: 0,
+      buy: 10
+    }));
+    save();
+    render();
+    undoBtn.disabled = true;
   };
 
   gameSelect.onchange = () => {
@@ -357,52 +411,10 @@
       state.count = prev.count;
       state.players = prev.players;
       state.currentGame = prev.currentGame;
-      save(); render();
+      save();
+      render();
       if (state.history.length === 0) undoBtn.disabled = true;
     }
-  };
-
-  // Lógica de Finalizar Partida
-  document.getElementById("finishBtn").onclick = () => {
-    if (!confirm("¿Deseas finalizar la partida actual?")) return;
-
-    // Encontrar el menor puntaje
-    let minScore = Math.min(...state.players.map(p => p.score));
-    let ganadores = state.players.filter(p => p.score === minScore);
-
-    // Registrar victorias
-    ganadores.forEach(g => {
-      state.wins[g.name] = (state.wins[g.name] || 0) + 1;
-    });
-
-    // Mostrar alerta de ganador
-    let msg = "GANADOR(ES):\n" + ganadores.map(g => `${g.name} (${g.score} pts)`).join("\n");
-    alert(msg);
-
-    // Resetear partida manteniendo nombres y wins
-    state.players.forEach(p => {
-      p.score = 0;
-      p.buy = 10;
-    });
-    state.currentGame = "1/3";
-    state.history = [];
-    undoBtn.disabled = true;
-    
-    save();
-    render();
-  };
-
-  // Botón Consolidado
-  document.getElementById("consolidadoBtn").onclick = () => {
-    if (Object.keys(state.wins).length === 0) {
-      alert("No hay partidas registradas aún.");
-      return;
-    }
-    let resumen = "PARTIDAS GANADAS:\n\n";
-    for (let nombre in state.wins) {
-      resumen += `${nombre}: ${state.wins[nombre]}\n`;
-    }
-    alert(resumen);
   };
 
   render();
