@@ -29,39 +29,37 @@
     font-weight: 900;
   }
 
+  /* Fila de controles alineada */
   .top-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 15px;
+    padding: 0 10px;
     margin-bottom: 10px;
   }
   
-  .left-controls {
+  .controls-group-left {
     display: flex;
-    gap: 8px; /* Reducido para que quepan 4 elementos */
+    gap: 6px;
     align-items: center;
   }
 
-  .right-controls {
+  .game-container {
     background: #063106;
     border: 1px solid #0f7c0f;
     border-radius: 6px;
-    padding: 2px 8px;
-    display: flex;
-    align-items: center;
+    padding: 0 4px;
   }
   
-  .right-controls select {
+  .game-container select {
     background: transparent;
     color: #fff;
     border: none;
     font-weight: bold;
-    font-size: 14px; /* Un poco más pequeño para optimizar espacio */
-    padding: 6px;
-    outline: none;
-    text-align: center;
+    font-size: 14px;
+    padding: 8px 4px;
     appearance: none;
+    outline: none;
   }
 
   select, button {
@@ -74,48 +72,45 @@
     cursor: pointer;
   }
 
-  button:active { transform: scale(0.95); }
-  button:disabled { opacity: 0.3; cursor: default; transform: none; }
+  .btn-finish {
+    border-color: #2f4f6f;
+    color: #a0c4e5;
+  }
 
-  .btn-undo { border-color: #b36b00; color: #ffb84d; font-size: 18px; line-height: 1; }
-  .btn-finish { border-color: #005bb7; color: #80bdff; font-weight: bold; }
-  .btn-consolidado { border-color: #555; color: #fff; width: 160px; }
-
-  /* Ajuste de Proporción 1:1.2 */
+  /* Grid de Jugadores con proporción 1:1.2 */
   .players {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr); /* Ajustado para altura */
     gap: 12px;
-    padding: 0 10px;
-    height: calc(100vh - 180px); 
+    padding: 0 12px;
+    /* Aspect Ratio 1:1.2 aproximado mediante auto-rows */
+    grid-auto-rows: calc((50vw - 18px) * 1.2); 
+    height: calc(100vh - 200px);
+    overflow-y: auto;
   }
 
   .player {
     border: 1px solid #222;
-    padding: 10px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
     background: #0a0a0a;
     border-radius: 10px;
     justify-content: space-between;
-    aspect-ratio: 1 / 1.2; /* Relación de aspecto solicitada */
-    margin: 0 auto;
-    width: 100%;
+    height: 100%; 
   }
 
-  .name-block { text-align: center; }
   .name {
     text-align: center;
     font-size: 16px;
     font-weight: bold;
     background: transparent;
     border: none;
-    color: #aaa;
+    color: #fff;
     outline: none;
     text-transform: uppercase;
     width: 100%;
-    margin-bottom: 4px;
   }
 
   .compras-indicator {
@@ -125,7 +120,7 @@
     font-weight: bold;
     padding: 2px 6px;
     border-radius: 4px;
-    display: inline-block;
+    margin-top: 4px;
   }
 
   .score-zone {
@@ -133,10 +128,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
   }
 
-  .score { font-size: 72px; font-weight: bold; line-height: 1; }
+  .score {
+    font-size: 72px;
+    font-weight: bold;
+  }
 
   .buy-controls {
     display: grid;
@@ -144,11 +141,8 @@
     gap: 5px;
   }
 
-  .btn-use-buy { border-color: #cc6600; color: #ffb84d; font-size: 10px; padding: 6px 2px; }
-  .btn-add-buy { border-color: #00662e; color: #94d48e; font-size: 12px; }
-
   .bottom-area {
-    height: 50px;
+    height: 70px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -165,28 +159,13 @@
   }
   .modal-box {
     background: #111;
-    padding: 25px;
+    padding: 20px;
     border-radius: 15px;
-    text-align: center;
     width: 85%;
     max-width: 300px;
     border: 1px solid #333;
-  }
-  .modal-box input {
-    width: 100%;
-    padding: 15px;
-    font-size: 32px;
     text-align: center;
-    background: #000;
-    color: #fff;
-    border: 1px solid #444;
-    margin: 20px 0;
-    border-radius: 8px;
   }
-  .modal-actions { display: flex; gap: 10px; }
-  .modal-actions button { flex: 1; padding: 15px 0; font-weight: bold; font-size: 18px; }
-  .btn-sumar { border-color: #2f6b3f; color: #9be5b1; }
-  .btn-restar { border-color: #6b2f2f; color: #e5a0a0; }
 </style>
 </head>
 <body>
@@ -194,27 +173,26 @@
 <h1>TELEFUKER</h1>
 
 <div class="top-controls">
-  <div class="left-controls">
+  <div class="controls-group-left">
     <select id="countSelect">
-      <option value="0" disabled selected>P</option>
+      <option value="0" disabled selected>JUGADORES</option>
       <option value="2">2</option>
       <option value="3">3</option>
       <option value="4">4</option>
     </select>
-    <button class="btn-undo" id="undoBtn" disabled>&#8592;</button>
-    <div class="right-controls">
-        <select id="gameSelect">
-          <option value="1/3">1/3</option>
-          <option value="1/4">1/4</option>
-          <option value="1/5">1/5</option>
-          <option value="2/3">2/3</option>
-          <option value="1/3 1/4">1/3 1/4</option>
-          <option value="2/4">2/4</option>
-          <option value="1/4 1/5">1/4 1/5</option>
-          <option value="2/5">2/5</option>
-          <option value="Escalera">Escalera</option>
-        </select>
-      </div>
+    <button id="undoBtn" disabled>&#10132;</button> <div class="game-container">
+      <select id="gameSelect">
+        <option value="1/3">1/3</option>
+        <option value="1/4">1/4</option>
+        <option value="1/5">1/5</option>
+        <option value="2/3">2/3</option>
+        <option value="1/3 1/4">1/3 1/4</option>
+        <option value="2/4">2/4</option>
+        <option value="1/4 1/5">1/4 1/5</option>
+        <option value="2/5">2/5</option>
+        <option value="Escalera">Escalera</option>
+      </select>
+    </div>
   </div>
   
   <button class="btn-finish" id="finishBtn">FINALIZAR</button>
@@ -223,29 +201,29 @@
 <div class="players" id="playersContainer"></div>
 
 <div class="bottom-area">
-  <button class="btn-consolidado" id="statsBtn">CONSOLIDADO</button>
+  <button id="consolidadoBtn">CONSOLIDADO</button>
 </div>
 
 <div class="modal" id="scoreModal">
   <div class="modal-box">
-    <h2 id="modalPlayerName" style="margin:0; font-size: 18px;">PUNTOS</h2>
-    <input id="scoreInput" type="number" inputmode="numeric" placeholder="0" />
-    <div class="modal-actions">
-      <button class="btn-sumar" id="sumarBtn">SUMAR</button>
-      <button class="btn-restar" id="restarBtn">RESTAR</button>
+    <h2 id="modalPlayerName">PUNTOS</h2>
+    <input id="scoreInput" type="number" inputmode="numeric" style="width:100%; padding:15px; font-size:30px; background:#000; color:#fff; border:1px solid #444; margin:15px 0; text-align:center;"/>
+    <div style="display:flex; gap:10px;">
+      <button id="sumarBtn" style="flex:1; border-color:#2f6b3f; color:#9be5b1;">SUMAR</button>
+      <button id="restarBtn" style="flex:1; border-color:#6b2f2f; color:#e5a0a0;">RESTAR</button>
     </div>
   </div>
 </div>
 
 <script>
 (() => {
-  // Estado Inicial ampliado para victorias
-  let state = JSON.parse(localStorage.getItem("telefuker_v2")) || {
+  // Se agregó 'wins' al objeto de estado para el consolidado
+  let state = JSON.parse(localStorage.getItem("telefuker_v3")) || {
     count: 0,
     players: [],
     history: [],
     currentGame: "1/3",
-    wins: {} // Formato: {"NOMBRE": 2}
+    wins: {} // Formato { "NOMBRE JUGADOR": cantidad_ganadas }
   };
 
   const container = document.getElementById("playersContainer");
@@ -254,12 +232,13 @@
   const gameSelect = document.getElementById("gameSelect");
   const scoreModal = document.getElementById("scoreModal");
   const scoreInput = document.getElementById("scoreInput");
-  const finishBtn = document.getElementById("finishBtn");
-  const statsBtn = document.getElementById("statsBtn");
   let activePlayerIndex = null;
 
+  // Estilo de flecha para el botón deshacer
+  undoBtn.style.transform = "scaleX(-1)"; 
+
   function save() {
-    localStorage.setItem("telefuker_v2", JSON.stringify(state));
+    localStorage.setItem("telefuker_v3", JSON.stringify(state));
   }
 
   function snapshot() {
@@ -275,14 +254,7 @@
 
   function render() {
     container.innerHTML = "";
-    if (state.count === 0) {
-        finishBtn.style.visibility = "hidden";
-        statsBtn.style.visibility = "hidden";
-        return;
-    }
-    finishBtn.style.visibility = "visible";
-    statsBtn.style.visibility = "visible";
-
+    if (state.count === 0) return;
     gameSelect.value = state.currentGame;
     countSelect.value = state.count;
 
@@ -290,7 +262,7 @@
       const card = document.createElement("div");
       card.className = "player";
       card.innerHTML = `
-        <div class="name-block">
+        <div style="text-align:center">
           <input class="name" value="${p.name}" data-index="${i}" spellcheck="false" />
           <div class="compras-indicator">COMPRAS: ${p.buy}</div>
         </div>
@@ -298,8 +270,8 @@
           <div class="score">${p.score}</div>
         </div>
         <div class="buy-controls">
-          <button class="btn-use-buy" ${p.buy <= 0 ? 'disabled' : ''} onclick="window.useBuy(${i})">USAR COMPRA</button>
-          <button class="btn-add-buy" onclick="window.addBuy(${i})">+1</button>
+          <button style="border-color:#cc6600; color:#ffb84d; font-size:10px" ${p.buy <= 0 ? 'disabled' : ''} onclick="window.useBuy(${i})">USAR COMPRA</button>
+          <button style="border-color:#00662e; color:#94d48e;" onclick="window.window.addBuy(${i})">+1</button>
         </div>
       `;
       container.appendChild(card);
@@ -309,8 +281,7 @@
       input.onfocus = (e) => e.target.select();
       input.onblur = (e) => {
         const idx = e.target.dataset.index;
-        const newName = e.target.value.toUpperCase() || `NOMBRE ${parseInt(idx)+1}`;
-        state.players[idx].name = newName;
+        state.players[idx].name = e.target.value.toUpperCase() || `NOMBRE ${parseInt(idx)+1}`;
         save();
       };
     });
@@ -334,7 +305,7 @@
   };
 
   window.addBuy = (i) => {
-    if (confirm(`¿Confirmar +1 compra para ${state.players[i].name}?`)) {
+    if (confirm(`¿Agregar compra a ${state.players[i].name}?`)) {
       snapshot();
       state.players[i].buy++;
       save();
@@ -342,35 +313,37 @@
     }
   };
 
-  const applyPoints = (op) => {
+  document.getElementById("sumarBtn").onclick = () => {
     const val = parseInt(scoreInput.value);
     if (isNaN(val) || val <= 0) return;
     snapshot();
-    if (op === 'sumar') state.players[activePlayerIndex].score += val;
-    else state.players[activePlayerIndex].score -= val;
+    state.players[activePlayerIndex].score += val;
     scoreModal.style.display = "none";
-    save();
-    render();
+    save(); render();
   };
 
-  document.getElementById("sumarBtn").onclick = () => applyPoints('sumar');
-  document.getElementById("restarBtn").onclick = () => applyPoints('restar');
+  document.getElementById("restarBtn").onclick = () => {
+    const val = parseInt(scoreInput.value);
+    if (isNaN(val) || val <= 0) return;
+    snapshot();
+    state.players[activePlayerIndex].score -= val;
+    scoreModal.style.display = "none";
+    save(); render();
+  };
 
   countSelect.onchange = () => {
     const n = parseInt(countSelect.value);
-    // Reinicio total al elegir jugadores
-    state.history = [];
-    state.count = n;
-    state.wins = {}; 
-    state.currentGame = "1/3";
-    state.players = Array.from({length: n}, (_, i) => ({
-      name: `NOMBRE ${i + 1}`,
-      score: 0,
-      buy: 10
-    }));
-    save();
-    render();
-    undoBtn.disabled = true;
+    if (confirm("¿Cambiar jugadores? Se borrarán todos los datos actuales.")) {
+      state = {
+        count: n,
+        players: Array.from({length: n}, (_, i) => ({ name: `NOMBRE ${i + 1}`, score: 0, buy: 10 })),
+        history: [],
+        currentGame: "1/3",
+        wins: {}
+      };
+      save();
+      render();
+    }
   };
 
   gameSelect.onchange = () => {
@@ -384,54 +357,52 @@
       state.count = prev.count;
       state.players = prev.players;
       state.currentGame = prev.currentGame;
-      save();
-      render();
+      save(); render();
       if (state.history.length === 0) undoBtn.disabled = true;
     }
   };
 
-  // NUEVA LÓGICA: FINALIZAR
-  finishBtn.onclick = () => {
-    if (!confirm("¿Deseas FINALIZAR la partida actual? Se determinará un ganador y se reiniciarán los puntos.")) return;
+  // Lógica de Finalizar Partida
+  document.getElementById("finishBtn").onclick = () => {
+    if (!confirm("¿Deseas finalizar la partida actual?")) return;
 
     // Encontrar el menor puntaje
     let minScore = Math.min(...state.players.map(p => p.score));
-    let winners = state.players.filter(p => p.score === minScore);
-    
+    let ganadores = state.players.filter(p => p.score === minScore);
+
     // Registrar victorias
-    winners.forEach(w => {
-        state.wins[w.name] = (state.wins[w.name] || 0) + 1;
+    ganadores.forEach(g => {
+      state.wins[g.name] = (state.wins[g.name] || 0) + 1;
     });
 
-    // Mostrar mensaje de victoria
-    let winMsg = winners.length > 1 ? "¡Empate entre: " : "¡Ganador: ";
-    winMsg += winners.map(w => w.name).join(", ") + "!";
-    alert(winMsg + "\n\nPartida terminada. Puntos y compras restablecidos.");
+    // Mostrar alerta de ganador
+    let msg = "GANADOR(ES):\n" + ganadores.map(g => `${g.name} (${g.score} pts)`).join("\n");
+    alert(msg);
 
-    // Reiniciar para nueva partida
+    // Resetear partida manteniendo nombres y wins
     state.players.forEach(p => {
-        p.score = 0;
-        p.buy = 10;
+      p.score = 0;
+      p.buy = 10;
     });
     state.currentGame = "1/3";
     state.history = [];
     undoBtn.disabled = true;
+    
     save();
     render();
-    statsBtn.click(); // Mostrar consolidado automáticamente
   };
 
-  // NUEVA LÓGICA: CONSOLIDADO
-  statsBtn.onclick = () => {
+  // Botón Consolidado
+  document.getElementById("consolidadoBtn").onclick = () => {
     if (Object.keys(state.wins).length === 0) {
-        alert("Aún no hay partidas ganadas registradas.");
-        return;
+      alert("No hay partidas registradas aún.");
+      return;
     }
-    let res = "CONSOLIDADO DE VICTORIAS:\n\n";
-    for (let name in state.wins) {
-        res += `${name}: ${state.wins[name]} ${state.wins[name] === 1 ? 'ganada' : 'ganadas'}\n`;
+    let resumen = "PARTIDAS GANADAS:\n\n";
+    for (let nombre in state.wins) {
+      resumen += `${nombre}: ${state.wins[nombre]}\n`;
     }
-    alert(res);
+    alert(resumen);
   };
 
   render();
