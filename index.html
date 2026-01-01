@@ -45,12 +45,6 @@
     flex: 1;
   }
 
-  /* Estilo para los controles inhabilitados */
-  .disabled-ui {
-    opacity: 0.3 !important;
-    pointer-events: none !important;
-  }
-
   .right-controls {
     background: #063106;
     border: 1px solid #0f7c0f;
@@ -152,8 +146,25 @@
     height: 45px; 
   }
 
-  .btn-use-buy { border-color: #cc6600; color: #ffb84d; font-size: 12px; font-weight: bold; }
-  .btn-add-buy { border-color: #00662e; color: #94d48e; font-size: 16px; font-weight: bold; }
+  .btn-use-buy { 
+    border-color: #cc6600; 
+    color: #ffb84d; 
+    font-size: 12px; 
+    font-weight: bold;
+  }
+  /* Estilo para botón comprar deshabilitado */
+  .btn-use-buy:disabled {
+    border-color: #444;
+    color: #666;
+    opacity: 0.5;
+  }
+
+  .btn-add-buy { 
+    border-color: #00662e; 
+    color: #94d48e; 
+    font-size: 16px; 
+    font-weight: bold;
+  }
 
   .bottom-area {
     height: 50px;
@@ -220,7 +231,7 @@
       <option value="4">4 JUGADORES</option>
     </select>
     <button class="btn-undo" id="undoBtn" disabled>DESHACER</button>
-    <div class="right-controls" id="gameWrapper">
+    <div class="right-controls" id="gameGroup">
       <select id="gameSelect">
         <option value="1/3">1/3</option>
         <option value="1/4">1/4</option>
@@ -277,7 +288,7 @@
   const countSelect = document.getElementById("countSelect");
   const undoBtn = document.getElementById("undoBtn");
   const gameSelect = document.getElementById("gameSelect");
-  const gameWrapper = document.getElementById("gameWrapper");
+  const gameGroup = document.getElementById("gameGroup");
   const scoreModal = document.getElementById("scoreModal");
   const scoreInput = document.getElementById("scoreInput");
   const finishBtn = document.getElementById("finishBtn");
@@ -301,18 +312,23 @@
     countSelect.value = state.count;
     
     if (state.count === 0) {
-      // Inhabilitar controles en modo INICIO
-      finishBtn.classList.add("disabled-ui");
-      undoBtn.classList.add("disabled-ui");
-      gameWrapper.classList.add("disabled-ui");
+      // Bloquear controles en modo INICIO
+      finishBtn.style.opacity = "0.2";
+      finishBtn.disabled = true;
+      undoBtn.style.opacity = "0.2";
+      undoBtn.disabled = true;
+      gameGroup.style.opacity = "0.2";
+      gameSelect.disabled = true;
       return;
     }
 
-    // Habilitar controles si hay jugadores
-    finishBtn.classList.remove("disabled-ui");
-    undoBtn.classList.remove("disabled-ui");
-    gameWrapper.classList.remove("disabled-ui");
-    
+    // Activar controles en partida
+    finishBtn.style.opacity = "1";
+    finishBtn.disabled = false;
+    undoBtn.style.opacity = state.history.length > 0 ? "1" : "0.5";
+    undoBtn.disabled = state.history.length === 0;
+    gameGroup.style.opacity = "1";
+    gameSelect.disabled = false;
     gameSelect.value = state.currentGame;
 
     state.players.forEach((p, i) => {
@@ -398,7 +414,6 @@
       };
       save();
       render();
-      undoBtn.disabled = true;
     } else {
       countSelect.value = state.count;
     }
@@ -414,7 +429,6 @@
       state.currentGame = prev.currentGame;
       save();
       render();
-      if (state.history.length === 0) undoBtn.disabled = true;
     }
   };
 
@@ -436,7 +450,6 @@
     state.players.forEach(p => { p.score = 0; p.buy = 10; });
     state.currentGame = "1/3";
     state.history = [];
-    undoBtn.disabled = true;
     save();
     render();
   };
@@ -445,19 +458,16 @@
 
   function showConsolidado() {
     const list = document.getElementById("consolidadoList");
-    // Si estamos en inicio y no hay victorias, mostrar vacío
     if (state.count === 0 && state.victories.every(v => v === 0)) {
         list.innerHTML = "<p style='color:#666'>No hay datos registrados.</p>";
     } else {
         let html = '<table class="consolidado-table">';
-        // Usar los nombres actuales si hay jugadores, o genéricos si estamos en INICIO
-        const displayPlayers = state.count > 0 ? state.players : Array.from({length: 4}, (_, i) => ({name: `JUGADOR ${i+1}`}));
-        
+        // Si estamos en INICIO, mostramos nombres genéricos si no hay jugadores definidos
+        const displayPlayers = state.count === 0 ? [1,2,3,4] : state.players;
         displayPlayers.forEach((p, i) => {
+          const name = state.count === 0 ? `JUGADOR ${i+1}` : p.name;
           const wins = state.victories[i] || 0;
-          if (wins > 0 || state.count > 0) {
-            html += `<tr><td>${p.name}</td><td>${wins}</td></tr>`;
-          }
+          html += `<tr><td>${name}</td><td>${wins}</td></tr>`;
         });
         html += '</table>';
         list.innerHTML = html;
@@ -466,7 +476,6 @@
   }
 
   render();
-  undoBtn.disabled = state.history.length === 0;
 })();
 </script>
 </body>
