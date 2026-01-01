@@ -75,9 +75,6 @@
     white-space: nowrap;
   }
 
-  /* Desactivar visualmente si no hay jugadores */
-  button:disabled, select:disabled { opacity: 0.3; cursor: default; }
-
   .btn-undo { border-color: #b36b00; color: #ffb84d; font-size: 13px; padding: 8px 6px; }
   .btn-finish { border-color: #2f6b3f; color: #9be5b1; font-weight: bold; }
   .btn-consolidado { border-color: #444; color: #fff; width: 160px; }
@@ -220,9 +217,9 @@
   <div class="controls-group-left">
     <select id="countSelect">
       <option value="0">INICIO</option>
-      <option value="2">2 JUGADORES</option>
-      <option value="3">3 JUGADORES</option>
-      <option value="4">4 JUGADORES</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
     </select>
     <button class="btn-undo" id="undoBtn" disabled>DESHACER</button>
     <div class="right-controls">
@@ -270,7 +267,8 @@
 
 <script>
 (() => {
-  let state = JSON.parse(localStorage.getItem("telefuker_v4")) || {
+  // Estado inicial carga lo guardado o inicia en 0 (INICIO)
+  let state = JSON.parse(localStorage.getItem("telefuker_v5")) || {
     count: 0,
     players: [],
     history: [],
@@ -282,12 +280,12 @@
   const countSelect = document.getElementById("countSelect");
   const undoBtn = document.getElementById("undoBtn");
   const gameSelect = document.getElementById("gameSelect");
-  const finishBtn = document.getElementById("finishBtn");
   const scoreModal = document.getElementById("scoreModal");
   const scoreInput = document.getElementById("scoreInput");
+  const finishBtn = document.getElementById("finishBtn");
   let activePlayerIndex = null;
 
-  function save() { localStorage.setItem("telefuker_v4", JSON.stringify(state)); }
+  function save() { localStorage.setItem("telefuker_v5", JSON.stringify(state)); }
 
   function snapshot() {
     const snap = {
@@ -303,20 +301,16 @@
   function render() {
     container.innerHTML = "";
     countSelect.value = state.count;
-    gameSelect.value = state.currentGame;
-
+    
     if (state.count === 0) {
-      // Estado de Inicio: Bloquear controles de juego
-      gameSelect.disabled = true;
+      finishBtn.style.opacity = "0.3";
       finishBtn.disabled = true;
-      undoBtn.disabled = true;
       return;
     }
 
-    // Estado Activo: Habilitar controles
-    gameSelect.disabled = false;
+    finishBtn.style.opacity = "1";
     finishBtn.disabled = false;
-    undoBtn.disabled = state.history.length === 0;
+    gameSelect.value = state.currentGame;
 
     state.players.forEach((p, i) => {
       const card = document.createElement("div");
@@ -389,24 +383,19 @@
 
   countSelect.onchange = () => {
     const n = parseInt(countSelect.value);
-    const mensaje = n === 0 ? "¿Ir al Inicio? Se perderán los datos de la partida." : "¿Cambiar cantidad de jugadores? Se reiniciará todo.";
+    const msg = n === 0 ? "¿Reiniciar la app por completo? Se borrará el consolidado y la partida." : "¿Cambiar cantidad de jugadores? Se borrarán datos y consolidado.";
     
-    if (confirm(mensaje)) {
-      if (n === 0) {
-        state.count = 0;
-        state.players = [];
-        state.history = [];
-      } else {
-        state = {
-          count: n,
-          players: Array.from({length: n}, (_, i) => ({ name: `NOMBRE ${i + 1}`, score: 0, buy: 10 })),
-          history: [],
-          currentGame: "1/3",
-          victories: [0, 0, 0, 0]
-        };
-      }
+    if (confirm(msg)) {
+      state = {
+        count: n,
+        players: n === 0 ? [] : Array.from({length: n}, (_, i) => ({ name: `NOMBRE ${i + 1}`, score: 0, buy: 10 })),
+        history: [],
+        currentGame: "1/3",
+        victories: [0, 0, 0, 0]
+      };
       save();
       render();
+      undoBtn.disabled = true;
     } else {
       countSelect.value = state.count;
     }
@@ -422,6 +411,7 @@
       state.currentGame = prev.currentGame;
       save();
       render();
+      if (state.history.length === 0) undoBtn.disabled = true;
     }
   };
 
@@ -443,6 +433,7 @@
     state.players.forEach(p => { p.score = 0; p.buy = 10; });
     state.currentGame = "1/3";
     state.history = [];
+    undoBtn.disabled = true;
     save();
     render();
   };
@@ -451,21 +442,22 @@
 
   function showConsolidado() {
     const list = document.getElementById("consolidadoList");
-    let html = '<table class="consolidado-table">';
-    // Solo mostrar consolidado si hay jugadores definidos
-    const displayPlayers = state.count > 0 ? state.players : [{name: "J1"}, {name: "J2"}, {name: "J3"}, {name: "J4"}].slice(0, 4);
-    
-    displayPlayers.forEach((p, i) => {
-      const wins = state.victories[i] || 0;
-      const name = state.count > 0 ? p.name : `JUGADOR ${i+1}`;
-      html += `<tr><td>${name}</td><td>${wins}</td></tr>`;
-    });
-    html += '</table>';
-    list.innerHTML = html;
+    if (state.count === 0 && state.victories.every(v => v === 0)) {
+        list.innerHTML = "<p style='color:#666'>No hay datos registrados.</p>";
+    } else {
+        let html = '<table class="consolidado-table">';
+        state.players.forEach((p, i) => {
+          const wins = state.victories[i] || 0;
+          html += `<tr><td>${p.name}</td><td>${wins}</td></tr>`;
+        });
+        html += '</table>';
+        list.innerHTML = html;
+    }
     document.getElementById("consolidadoModal").style.display = "flex";
   }
 
   render();
+  undoBtn.disabled = state.history.length === 0;
 })();
 </script>
 </body>
