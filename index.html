@@ -75,6 +75,9 @@
     white-space: nowrap;
   }
 
+  /* Desactivar visualmente si no hay jugadores */
+  button:disabled, select:disabled { opacity: 0.3; cursor: default; }
+
   .btn-undo { border-color: #b36b00; color: #ffb84d; font-size: 13px; padding: 8px 6px; }
   .btn-finish { border-color: #2f6b3f; color: #9be5b1; font-weight: bold; }
   .btn-consolidado { border-color: #444; color: #fff; width: 160px; }
@@ -216,10 +219,10 @@
 <div class="top-controls">
   <div class="controls-group-left">
     <select id="countSelect">
-      <option value="0" disabled selected>JUGADORES</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
+      <option value="0">INICIO</option>
+      <option value="2">2 JUGADORES</option>
+      <option value="3">3 JUGADORES</option>
+      <option value="4">4 JUGADORES</option>
     </select>
     <button class="btn-undo" id="undoBtn" disabled>DESHACER</button>
     <div class="right-controls">
@@ -279,6 +282,7 @@
   const countSelect = document.getElementById("countSelect");
   const undoBtn = document.getElementById("undoBtn");
   const gameSelect = document.getElementById("gameSelect");
+  const finishBtn = document.getElementById("finishBtn");
   const scoreModal = document.getElementById("scoreModal");
   const scoreInput = document.getElementById("scoreInput");
   let activePlayerIndex = null;
@@ -298,14 +302,21 @@
 
   function render() {
     container.innerHTML = "";
-    // Ajuste: si no hay jugadores seleccionados, no dibuja nada
-    if (!state.count || state.count === 0) {
-      countSelect.value = "0";
+    countSelect.value = state.count;
+    gameSelect.value = state.currentGame;
+
+    if (state.count === 0) {
+      // Estado de Inicio: Bloquear controles de juego
+      gameSelect.disabled = true;
+      finishBtn.disabled = true;
+      undoBtn.disabled = true;
       return;
     }
-    
-    gameSelect.value = state.currentGame;
-    countSelect.value = state.count;
+
+    // Estado Activo: Habilitar controles
+    gameSelect.disabled = false;
+    finishBtn.disabled = false;
+    undoBtn.disabled = state.history.length === 0;
 
     state.players.forEach((p, i) => {
       const card = document.createElement("div");
@@ -378,22 +389,27 @@
 
   countSelect.onchange = () => {
     const n = parseInt(countSelect.value);
-    // Solo pide confirmación si ya hay un juego en curso, si no, inicia directamente
-    if (state.count > 0 && !confirm("¿Cambiar jugadores? Se borrarán datos y consolidado.")) {
-        countSelect.value = state.count;
-        return;
-    }
+    const mensaje = n === 0 ? "¿Ir al Inicio? Se perderán los datos de la partida." : "¿Cambiar cantidad de jugadores? Se reiniciará todo.";
     
-    state = {
-      count: n,
-      players: Array.from({length: n}, (_, i) => ({ name: `NOMBRE ${i + 1}`, score: 0, buy: 10 })),
-      history: [],
-      currentGame: "1/3",
-      victories: [0, 0, 0, 0]
-    };
-    save();
-    render();
-    undoBtn.disabled = true;
+    if (confirm(mensaje)) {
+      if (n === 0) {
+        state.count = 0;
+        state.players = [];
+        state.history = [];
+      } else {
+        state = {
+          count: n,
+          players: Array.from({length: n}, (_, i) => ({ name: `NOMBRE ${i + 1}`, score: 0, buy: 10 })),
+          history: [],
+          currentGame: "1/3",
+          victories: [0, 0, 0, 0]
+        };
+      }
+      save();
+      render();
+    } else {
+      countSelect.value = state.count;
+    }
   };
 
   gameSelect.onchange = () => { state.currentGame = gameSelect.value; save(); };
@@ -406,12 +422,10 @@
       state.currentGame = prev.currentGame;
       save();
       render();
-      if (state.history.length === 0) undoBtn.disabled = true;
     }
   };
 
   document.getElementById("finishBtn").onclick = () => {
-    if (!state.count) return;
     if (!confirm("¿Deseas finalizar la partida actual?")) return;
 
     let winnerIdx = 0;
@@ -429,22 +443,22 @@
     state.players.forEach(p => { p.score = 0; p.buy = 10; });
     state.currentGame = "1/3";
     state.history = [];
-    undoBtn.disabled = true;
     save();
     render();
   };
 
-  document.getElementById("consolidadoBtn").onclick = () => {
-    if (!state.count) return;
-    showConsolidado();
-  };
+  document.getElementById("consolidadoBtn").onclick = () => showConsolidado();
 
   function showConsolidado() {
     const list = document.getElementById("consolidadoList");
     let html = '<table class="consolidado-table">';
-    state.players.forEach((p, i) => {
+    // Solo mostrar consolidado si hay jugadores definidos
+    const displayPlayers = state.count > 0 ? state.players : [{name: "J1"}, {name: "J2"}, {name: "J3"}, {name: "J4"}].slice(0, 4);
+    
+    displayPlayers.forEach((p, i) => {
       const wins = state.victories[i] || 0;
-      html += `<tr><td>${p.name}</td><td>${wins}</td></tr>`;
+      const name = state.count > 0 ? p.name : `JUGADOR ${i+1}`;
+      html += `<tr><td>${name}</td><td>${wins}</td></tr>`;
     });
     html += '</table>';
     list.innerHTML = html;
@@ -452,7 +466,6 @@
   }
 
   render();
-  undoBtn.disabled = state.history.length === 0;
 })();
 </script>
 </body>
