@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>TELEFUKER</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
 *{
   box-sizing:border-box;
-  font-family: Arial, sans-serif;
+  font-family:Arial, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -19,37 +21,53 @@ html,body{
   color:#fff;
   height:100%;
   overflow:hidden;
-  touch-action: manipulation;
 }
 
 /* ===== HEADER ===== */
 header{
   text-align:center;
-  padding:10px 0;
-  font-size:26px;
+  padding:8px 0;
+  font-size:28px;
   font-weight:bold;
 }
 
-/* ===== CONTENEDOR PRINCIPAL ===== */
-.app{
-  height:100vh;
-  display:flex;
-  flex-direction:column;
+/* ===== TOP BAR ===== */
+.top-bar{
+  display:grid;
+  grid-template-columns: 1fr auto 1fr auto;
+  align-items:center;
+  gap:6px;
+  padding:6px;
 }
 
-/* ===== GRID DE JUGADORES ===== */
+.top-bar button,
+.top-bar select{
+  background:#1c1c1c;
+  color:#fff;
+  border:none;
+  padding:10px;
+  font-size:16px;
+  border-radius:6px;
+}
+
+.undo{
+  font-size:20px;
+  padding:10px 14px;
+}
+
+/* ===== GRID JUGADORES ===== */
 .players{
-  flex:1;
   display:grid;
   grid-template-columns:1fr 1fr;
   grid-template-rows:1fr 1fr;
   gap:8px;
   padding:8px;
+  height:calc(100vh - 300px);
 }
 
 .player{
-  border:2px solid #444;
-  border-radius:10px;
+  background:#111;
+  border-radius:8px;
   display:flex;
   flex-direction:column;
   justify-content:space-between;
@@ -58,15 +76,16 @@ header{
 
 .player-name{
   text-align:center;
-  font-weight:bold;
+  font-size:16px;
 }
 
 .score{
   text-align:center;
   font-size:48px;
-  margin:10px 0;
+  font-weight:bold;
 }
 
+/* ===== CONTROLES ===== */
 .controls{
   display:flex;
   gap:6px;
@@ -74,181 +93,202 @@ header{
 
 .controls button{
   flex:1;
-  font-size:16px;
-  padding:6px;
+  font-size:18px;
+  padding:10px;
+  border:none;
+  border-radius:6px;
 }
 
-/* ===== BARRA INFERIOR ===== */
+.add{background:#1e7f34;color:#fff;}
+.sub{background:#8b1c1c;color:#fff;}
+.buy{background:#444;color:#fff;}
+
+/* ===== FOOTER BUTTONS ===== */
 .footer{
-  padding:8px;
   display:flex;
-  gap:8px;
+  gap:10px;
+  padding:10px;
 }
 
-/* Botones inferiores */
 .footer button{
   flex:1;
-  padding:10px;
   font-size:16px;
-  border-radius:8px;
+  padding:12px;
+  border:none;
+  border-radius:6px;
 }
+
+.finish{background:#1e7f34;color:#fff;}
+.consolidated{background:#333;color:#fff;}
 
 /* ===== MODAL ===== */
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.85);
+  background:rgba(0,0,0,.8);
   display:none;
   justify-content:center;
   align-items:center;
-  z-index:10;
 }
 
 .modal-content{
   background:#111;
-  border:2px solid #555;
-  padding:16px;
+  padding:20px;
+  border-radius:8px;
   width:90%;
   max-width:400px;
-  border-radius:10px;
-  text-align:center;
+}
+
+.modal-content h2{
+  margin-top:0;
 }
 
 .modal-content button{
-  margin-top:12px;
-  padding:8px 16px;
+  margin-top:10px;
+  width:100%;
+  padding:10px;
+  border:none;
+  background:#333;
+  color:#fff;
+  border-radius:6px;
 }
 </style>
 </head>
 
 <body>
-<div class="app">
 
 <header>TELEFUKER</header>
+
+<div class="top-bar">
+  <select id="playersCount">
+    <option value="2">2 jugadores</option>
+    <option value="3">3 jugadores</option>
+    <option value="4" selected>4 jugadores</option>
+  </select>
+
+  <button class="undo" id="undo">←</button>
+
+  <select id="gameSelect">
+    <option>Juego 1</option>
+    <option>Juego 2</option>
+  </select>
+
+  <button id="reset">Reiniciar</button>
+</div>
 
 <div class="players" id="players"></div>
 
 <div class="footer">
-  <button onclick="finalizarPartida()">FINALIZAR</button>
-  <button onclick="verConsolidado()">CONSOLIDADO</button>
-</div>
-
+  <button class="finish" id="finish">FINALIZAR</button>
+  <button class="consolidated" id="consolidated">CONSOLIDADO</button>
 </div>
 
 <!-- MODAL -->
 <div class="modal" id="modal">
-  <div class="modal-content" id="modalContent"></div>
+  <div class="modal-content">
+    <h2 id="modalTitle"></h2>
+    <div id="modalBody"></div>
+    <button onclick="closeModal()">CERRAR</button>
+  </div>
 </div>
 
 <script>
-/* =========================
-   1️⃣ ESTADO DEL JUEGO
-========================= */
+const playersDiv = document.getElementById("players");
+const history = [];
+let players = [];
 
-const state = {
-  players:[
-    {name:"Jugador 1", score:0},
-    {name:"Jugador 2", score:0},
-    {name:"Jugador 3", score:0},
-    {name:"Jugador 4", score:0},
-  ]
-};
-
-/* =========================
-   2️⃣ RENDER
-========================= */
-
-function render(){
-  const container = document.getElementById("players");
-  container.innerHTML = "";
-
-  state.players.forEach((p,i)=>{
-    const div = document.createElement("div");
-    div.className = "player";
-    div.innerHTML = `
-      <div class="player-name">${p.name}</div>
-      <div class="score">${p.score}</div>
+function initPlayers(count=4){
+  players = [];
+  playersDiv.innerHTML = "";
+  for(let i=0;i<4;i++){
+    const active = i < count;
+    players.push({name:`Jugador ${i+1}`, score:0, buys:0, active});
+    const p = document.createElement("div");
+    p.className="player";
+    p.innerHTML=`
+      <div class="player-name">${players[i].name}</div>
+      <div class="score" id="score${i}">0</div>
       <div class="controls">
-        <button onclick="sumar(${i})">+</button>
-        <button onclick="restar(${i})">−</button>
-      </div>
-    `;
-    container.appendChild(div);
-  });
+        <button class="add">+</button>
+        <button class="sub">−</button>
+        <button class="buy">💰</button>
+      </div>`;
+    playersDiv.appendChild(p);
+
+    if(!active) p.style.visibility="hidden";
+
+    const [add,sub,buy]=p.querySelectorAll("button");
+
+    add.onclick=()=>updateScore(i,1);
+    sub.onclick=()=>updateScore(i,-1);
+    buy.onclick=()=>useBuy(i);
+  }
 }
 
-function sumar(i){
-  state.players[i].score++;
+function updateScore(i,val){
+  players[i].score += val;
+  history.push({i,val});
   render();
 }
 
-function restar(i){
-  if(state.players[i].score > 0){
-    state.players[i].score--;
+function useBuy(i){
+  if(players[i].buys>0){
+    players[i].buys--;
     render();
   }
 }
 
-/* =========================
-   3️⃣ FINALIZAR PARTIDA
-   (SOLO LECTURA)
-========================= */
-
-function finalizarPartida(){
-  const min = Math.min(...state.players.map(p=>p.score));
-  const ganador = state.players.find(p=>p.score === min);
-
-  abrirModal(`
-    <h3>¿Finalizar partida?</h3>
-    <p>Ganador: <b>${ganador.name}</b><br>Puntos: ${min}</p>
-    <button onclick="confirmarGanador('${ganador.name}')">CONFIRMAR</button>
-    <button onclick="cerrarModal()">CANCELAR</button>
-  `);
-}
-
-function confirmarGanador(nombre){
-  const data = JSON.parse(localStorage.getItem("telefuker_consolidado")) || {};
-
-  state.players.forEach(p=>{
-    if(!(p.name in data)) data[p.name] = 0;
+function render(){
+  players.forEach((p,i)=>{
+    const s=document.getElementById("score"+i);
+    if(s) s.textContent=p.score;
   });
-
-  data[nombre]++;
-  localStorage.setItem("telefuker_consolidado", JSON.stringify(data));
-  cerrarModal();
 }
 
-/* =========================
-   4️⃣ CONSOLIDADO
-========================= */
+document.getElementById("undo").onclick=()=>{
+  const last=history.pop();
+  if(!last)return;
+  players[last.i].score-=last.val;
+  render();
+};
 
-function verConsolidado(){
-  const data = JSON.parse(localStorage.getItem("telefuker_consolidado")) || {};
-  let html = "<h3>Consolidado</h3>";
-
-  for(const jugador in data){
-    html += `<p>${jugador}: ${data[jugador]} partidas</p>`;
+document.getElementById("reset").onclick=()=>{
+  if(confirm("¿Reiniciar partida?")){
+    initPlayers(Number(playersCount.value));
   }
+};
 
-  html += `<button onclick="cerrarModal()">CERRAR</button>`;
-  abrirModal(html);
+document.getElementById("finish").onclick=()=>{
+  const active=players.filter(p=>p.active);
+  let winner=active[0];
+  active.forEach(p=>{if(p.score<winner.score)winner=p});
+  if(confirm(`Ganador: ${winner.name}\n¿Confirmar?`)){
+    const data=JSON.parse(localStorage.getItem("consolidado")||"{}");
+    active.forEach(p=>{if(!(p.name in data))data[p.name]=0});
+    data[winner.name]++;
+    localStorage.setItem("consolidado",JSON.stringify(data));
+  }
+};
+
+document.getElementById("consolidated").onclick=()=>{
+  const data=JSON.parse(localStorage.getItem("consolidado")||"{}");
+  let html="";
+  for(const k in data) html+=`${k}: ${data[k]}<br>`;
+  showModal("Consolidado",html||"Sin registros");
+};
+
+function showModal(title,body){
+  modalTitle.textContent=title;
+  modalBody.innerHTML=body;
+  modal.style.display="flex";
 }
 
-/* =========================
-   5️⃣ MODAL
-========================= */
-
-function abrirModal(html){
-  document.getElementById("modalContent").innerHTML = html;
-  document.getElementById("modal").style.display = "flex";
+function closeModal(){
+  modal.style.display="none";
 }
 
-function cerrarModal(){
-  document.getElementById("modal").style.display = "none";
-}
-
-/* INIT */
-render();
+playersCount.onchange=()=>initPlayers(Number(playersCount.value));
+initPlayers(4);
 </script>
 </body>
 </html>
