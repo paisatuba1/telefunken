@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<title>TELEFUKER</title>
+<title>TELEFUNKEN</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
   * {
@@ -240,7 +240,7 @@
 </head>
 <body>
 
-<h1>TELEFUKER</h1>
+<h1>TELEFUNKEN</h1>
 
 <div class="top-controls">
   <div class="controls-group-left">
@@ -288,7 +288,7 @@
 (() => {
   const GAMES_LIST = ["1/3", "1/4", "1/5", "2/3", "1/3 1/4", "2/4", "1/4 1/5", "2/5", "Escalera"];
 
-  let state = JSON.parse(localStorage.getItem("telefuker_v6")) || {
+  let state = JSON.parse(localStorage.getItem("telefunken_v7")) || {
     count: 0,
     players: [],
     history: [],
@@ -307,7 +307,7 @@
   const finishBtn = document.getElementById("finishBtn");
   let activePlayerIndex = null;
 
-  function save() { localStorage.setItem("telefuker_v6", JSON.stringify(state)); }
+  function save() { localStorage.setItem("telefunken_v7", JSON.stringify(state)); }
 
   function snapshot() {
     const snap = {
@@ -445,7 +445,7 @@
     let minScore = state.players[0].score;
     state.players.forEach((p, idx) => {
       if (p.score < minScore) { minScore = p.score; winnerIdx = idx; }
-      state.totals[idx] += p.score; // Acumular puntos totales
+      state.totals[idx] += p.score;
     });
     state.victories[winnerIdx]++; 
     showConsolidado();
