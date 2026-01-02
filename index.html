@@ -79,25 +79,25 @@
     white-space: nowrap;
   }
 
-  .btn-undo { border-color: #b36b00; color: #ffb84d; font-size: 13px; padding: 8px 6px; }
+  .btn-undo { border-color: #b36b00; color: #ffb84d; font-size: 13px; }
   .btn-finish { border-color: #2f6b3f; color: #9be5b1; font-weight: bold; }
   .btn-consolidado { border-color: #444; color: #fff; width: 160px; }
 
-  /* CONTENEDOR DE JUGADORES - AJUSTADO */
+  /* JUGADORES: Flexible para que no se desborde en móvil */
   .players {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Siempre 2 columnas en celular */
+    grid-template-columns: 1fr 1fr; /* 2 columnas exactas en móvil */
     gap: 10px;
     padding: 0 10px;
     height: calc(100vh - 180px);
-    overflow-y: auto;
-    width: 100%;
+    overflow: hidden;
   }
 
-  /* AJUSTE PARA PC (Más de 800px) */
-  @media (min-width: 800px) {
+  /* Si la pantalla es ancha (PC/Tablet), ponerlos todos en fila */
+  @media (min-width: 600px) {
     .players {
-      grid-template-columns: repeat(4, 1fr); /* 4 jugadores en fila en PC */
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      grid-template-rows: 1fr;
       align-items: center;
     }
   }
@@ -111,8 +111,7 @@
     border-radius: 10px;
     justify-content: space-around;
     aspect-ratio: 1 / 1.2;
-    width: 100%;
-    max-height: 100%;
+    width: 100%; /* Ajustado al 100% de su columna */
   }
 
   .name-block { text-align: center; }
@@ -147,7 +146,7 @@
   }
 
   .score {
-    font-size: 64px; /* Un poco más pequeño para asegurar que quepa en todo móvil */
+    font-size: 60px; /* Reducido un poco para evitar desbordes */
     font-weight: bold;
     line-height: 1;
   }
@@ -156,10 +155,10 @@
     display: grid;
     grid-template-columns: 1.5fr 1fr;
     gap: 6px;
-    height: 45px; 
+    height: 40px; 
   }
 
-  .btn-use-buy { border-color: #cc6600; color: #ffb84d; font-size: 12px; font-weight: bold; }
+  .btn-use-buy { border-color: #cc6600; color: #ffb84d; font-size: 11px; font-weight: bold; }
   .btn-use-buy:disabled { border-color: #444; color: #666; opacity: 0.5; }
   .btn-add-buy { border-color: #00662e; color: #94d48e; font-size: 16px; font-weight: bold; }
 
@@ -258,7 +257,6 @@
 (() => {
   const GAMES_LIST = ["1/3", "1/4", "1/5", "2/3", "1/3 1/4", "2/4", "1/4 1/5", "2/5", "Escalera"];
 
-  // Usamos una nueva versión de storage por seguridad en los cambios estructurales
   let state = JSON.parse(localStorage.getItem("telefunken_v8")) || {
     count: 0,
     players: [],
@@ -387,7 +385,7 @@
 
   countSelect.onchange = () => {
     const n = parseInt(countSelect.value);
-    const msg = n === 0 ? "¿Reiniciar la app?" : "¿Cambiar jugadores? Se borrarán todos los datos.";
+    const msg = n === 0 ? "¿Reiniciar la app?" : "¿Cambiar jugadores?";
     if (confirm(msg)) {
       state = {
         count: n,
@@ -432,7 +430,7 @@
     if (state.count === 0 && state.victories.every(v => v === 0)) {
         list.innerHTML = "<p style='color:#666'>No hay datos.</p>";
     } else {
-        let html = '<table class="consolidado-table"><tr><th>NOMBRE</th><th>WINS</th><th>TOTAL</th></tr>';
+        let html = '<table class="consolidado-table"><tr><th>NOMBRE</th><th>WINS</th><th>PUNTOS TOTALES</th></tr>';
         const displayPlayers = state.count === 0 ? [1,2,3,4] : state.players;
         displayPlayers.forEach((p, i) => {
           const name = state.count === 0 ? `JUGADOR ${i+1}` : p.name;
