@@ -65,17 +65,9 @@
     appearance: none;
   }
 
-  #gameSelect option {
-    background: #111;
-    color: #fff;
-  }
-  #gameSelect option.completed {
-    color: #555;
-  }
-  #gameSelect option.active {
-    color: #9be5b1;
-    font-weight: bold;
-  }
+  #gameSelect option { background: #111; color: #fff; }
+  #gameSelect option.completed { color: #555; }
+  #gameSelect option.active { color: #9be5b1; font-weight: bold; }
 
   select, button {
     background: #111;
@@ -93,7 +85,7 @@
   .btn-finish { border-color: #2f6b3f; color: #9be5b1; font-weight: bold; }
   .btn-consolidado { border-color: #444; color: #fff; width: 160px; }
 
-  /* ESTILO PARA MÓVIL (Por defecto) */
+  /* MÓVIL (2 columnas) */
   .players {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -103,15 +95,13 @@
     align-items: center;
   }
 
-  /* ESTILO PARA PC (Pantallas anchas) */
+  /* PC (4 columnas en una fila) */
   @media (min-width: 800px) {
     .players {
-      grid-template-columns: repeat(4, 1fr); /* 4 jugadores en una sola fila */
+      grid-template-columns: repeat(4, 1fr);
       grid-template-rows: 1fr;
     }
-    .player {
-      aspect-ratio: 1 / 1.1; /* Un poco más compactos en PC */
-    }
+    .player { aspect-ratio: 1 / 1.1; }
   }
 
   .player {
@@ -155,6 +145,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
   }
 
   .score {
@@ -170,31 +161,11 @@
     height: 45px; 
   }
 
-  .btn-use-buy { 
-    border-color: #cc6600; 
-    color: #ffb84d; 
-    font-size: 12px; 
-    font-weight: bold;
-  }
-  .btn-use-buy:disabled {
-    border-color: #444;
-    color: #666;
-    opacity: 0.5;
-  }
+  .btn-use-buy { border-color: #cc6600; color: #ffb84d; font-size: 12px; font-weight: bold; }
+  .btn-use-buy:disabled { border-color: #444; color: #666; opacity: 0.5; }
+  .btn-add-buy { border-color: #00662e; color: #94d48e; font-size: 16px; font-weight: bold; }
 
-  .btn-add-buy { 
-    border-color: #00662e; 
-    color: #94d48e; 
-    font-size: 16px; 
-    font-weight: bold;
-  }
-
-  .bottom-area {
-    height: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+  .bottom-area { height: 50px; display: flex; justify-content: center; align-items: center; }
 
   .modal {
     position: fixed;
@@ -233,18 +204,8 @@
     margin-top: 15px;
     border-collapse: collapse;
   }
-  .consolidado-table th {
-    font-size: 10px;
-    color: #666;
-    text-align: center;
-    padding-bottom: 5px;
-  }
-  .consolidado-table td {
-    padding: 10px 4px;
-    border-bottom: 1px solid #222;
-    text-align: center;
-    font-size: 14px;
-  }
+  .consolidado-table th { font-size: 10px; color: #666; text-align: center; padding-bottom: 5px; }
+  .consolidado-table td { padding: 10px 4px; border-bottom: 1px solid #222; text-align: center; font-size: 14px; }
   .consolidado-table td:first-child { text-align: left; font-weight: bold; }
   .consolidado-table .win-cell { color: #ffd700; font-weight: bold; }
   .consolidado-table .total-cell { color: #87CEEB; font-weight: bold; }
@@ -267,7 +228,6 @@
       <select id="gameSelect"></select>
     </div>
   </div>
-  
   <button class="btn-finish" id="finishBtn">FINALIZAR</button>
 </div>
 
@@ -300,7 +260,8 @@
 (() => {
   const GAMES_LIST = ["1/3", "1/4", "1/5", "2/3", "1/3 1/4", "2/4", "1/4 1/5", "2/5", "Escalera"];
 
-  let state = JSON.parse(localStorage.getItem("telefuker_v6")) || {
+  // Usamos una nueva versión de storage para evitar conflictos con cambios estructurales
+  let state = JSON.parse(localStorage.getItem("telefunken_v9")) || {
     count: 0,
     players: [],
     history: [],
@@ -319,7 +280,7 @@
   const finishBtn = document.getElementById("finishBtn");
   let activePlayerIndex = null;
 
-  function save() { localStorage.setItem("telefuker_v6", JSON.stringify(state)); }
+  function save() { localStorage.setItem("telefunken_v9", JSON.stringify(state)); }
 
   function snapshot() {
     const snap = {
@@ -441,13 +402,16 @@
 
   gameSelect.onchange = () => { state.currentGame = gameSelect.value; save(); updateGameSelector(); };
 
+  // BOTÓN DESHACER CON CONFIRMACIÓN
   undoBtn.onclick = () => {
     if (state.history.length > 0) {
-      const prev = state.history.pop();
-      state.count = prev.count; state.players = prev.players;
-      state.currentGame = prev.currentGame; state.victories = prev.victories;
-      state.totals = prev.totals;
-      save(); render();
+      if (confirm("¿Seguro que quieres DESHACER la última acción?")) {
+        const prev = state.history.pop();
+        state.count = prev.count; state.players = prev.players;
+        state.currentGame = prev.currentGame; state.victories = prev.victories;
+        state.totals = prev.totals;
+        save(); render();
+      }
     }
   };
 
