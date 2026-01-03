@@ -130,14 +130,16 @@
     width: 100%;
   }
 
+  /* Aumento de tamaño para el indicador de compras */
   .compras-indicator {
     background: #ffd700;
     color: #000;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 1px 6px;
+    font-size: 14px; /* Aumentado de 11px a 14px */
+    font-weight: 900; /* Más grueso */
+    padding: 2px 8px;
     border-radius: 4px;
     display: inline-block;
+    margin-top: 4px;
   }
 
   .score-zone {
@@ -167,6 +169,7 @@
 
   .bottom-area { height: 50px; display: flex; justify-content: center; align-items: center; }
 
+  /* Modales y tablas permanecen igual */
   .modal {
     position: fixed;
     inset: 0;
@@ -260,8 +263,7 @@
 (() => {
   const GAMES_LIST = ["1/3", "1/4", "1/5", "2/3", "1/3 1/4", "2/4", "1/4 1/5", "2/5", "Escalera"];
 
-  // Usamos una nueva versión de storage para evitar conflictos con cambios estructurales
-  let state = JSON.parse(localStorage.getItem("telefunken_v9")) || {
+  let state = JSON.parse(localStorage.getItem("telefunken_v10")) || {
     count: 0,
     players: [],
     history: [],
@@ -280,7 +282,7 @@
   const finishBtn = document.getElementById("finishBtn");
   let activePlayerIndex = null;
 
-  function save() { localStorage.setItem("telefunken_v9", JSON.stringify(state)); }
+  function save() { localStorage.setItem("telefunken_v10", JSON.stringify(state)); }
 
   function snapshot() {
     const snap = {
@@ -389,7 +391,7 @@
 
   countSelect.onchange = () => {
     const n = parseInt(countSelect.value);
-    const msg = n === 0 ? "¿Reiniciar la app por completo?" : "¿Cambiar jugadores? Se borrarán todos los datos.";
+    const msg = n === 0 ? "¿Reiniciar la app?" : "¿Cambiar jugadores?";
     if (confirm(msg)) {
       state = {
         count: n,
@@ -402,7 +404,6 @@
 
   gameSelect.onchange = () => { state.currentGame = gameSelect.value; save(); updateGameSelector(); };
 
-  // BOTÓN DESHACER CON CONFIRMACIÓN
   undoBtn.onclick = () => {
     if (state.history.length > 0) {
       if (confirm("¿Seguro que quieres DESHACER la última acción?")) {
